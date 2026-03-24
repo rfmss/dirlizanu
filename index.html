@@ -102,10 +102,13 @@
     .tier-group { margin-bottom: 24px; }
 
     .levels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+      display: -webkit-flex;
+      display: flex;
+      -webkit-flex-wrap: wrap;
+      flex-wrap: wrap;
       gap: 8px;
     }
+    .level-card { width: calc(50% - 4px); }
 
     /* Level card */
     .level-card {
