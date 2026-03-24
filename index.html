@@ -317,6 +317,7 @@
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      touch-action: manipulation;
       transition: transform 0.13s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       will-change: transform;
       letter-spacing: -0.5px;
@@ -760,20 +761,33 @@ function renderizar(animado) {
    LÓGICA DO JOGO
 ═══════════════════════════════════════════════════════ */
 function tocarPeca(num) {
-  var idx = tabuleiro.indexOf(num);
-  if (!adjacente(idx, vazio)) return;
-  mover(idx);
-}
+  var idx  = tabuleiro.indexOf(num);
+  var rowT = idx  >> 2, colT = idx  & 3;
+  var rowV = vazio >> 2, colV = vazio & 3;
 
-function adjacente(a, b) {
-  return Math.abs((a >> 2) - (b >> 2)) + Math.abs((a & 3) - (b & 3)) === 1;
-}
+  var passo, count;
 
-function mover(idxPeca) {
-  tabuleiro[vazio]    = tabuleiro[idxPeca];
-  tabuleiro[idxPeca]  = 0;
-  vazio               = idxPeca;
-  jogadas++;
+  if (rowT === rowV && colT !== colV) {
+    // Mesma linha — desliza todas as peças entre a clicada e o espaço
+    passo = colT > colV ? 1 : -1;
+    count = Math.abs(colT - colV);
+  } else if (colT === colV && rowT !== rowV) {
+    // Mesma coluna
+    passo = rowT > rowV ? 4 : -4;
+    count = Math.abs(rowT - rowV);
+  } else {
+    return; // peça fora da linha/coluna do espaço vazio
+  }
+
+  // Move o espaço vazio passo a passo até chegar na peça clicada
+  for (var i = 0; i < count; i++) {
+    var prox = vazio + passo;
+    tabuleiro[vazio] = tabuleiro[prox];
+    tabuleiro[prox]  = 0;
+    vazio = prox;
+  }
+
+  jogadas += count;
   renderizar(true);
   atualizarStats();
   sndDeslizar();
