@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Slide Puzzle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Warm dark palette — Anthropic-inspired */
+      --bg:        #18160f;
+      --bg2:       #1e1c14;
+      --surface:   #232018;
+      --surface2:  #2c2820;
+      --border:    #38342a;
+      --border2:   #44403a;
+      --text:      #f0ede8;
+      --text2:     #c8c4bc;
+      --muted:     #8b867e;
+      --accent:    #d97757;   /* Anthropic coral */
+      --accent2:   #e8895f;
+      --tile:      #2a261e;
+      --tile-hi:   #33302a;
+
+      /* Difficulty palette — warm tones, not neons */
+      --easy:   #73c48a;
+      --medium: #d4a853;
+      --hard:   #d97757;
+      --expert: #c26b8f;
+
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ─── SCREENS ──────────────────────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ─── LEVEL SELECT ─────────────────────────────────────────── */
+    #screen-select {
+      padding: 36px 18px 60px;
+      max-width: 880px;
+      margin: 0 auto;
+    }
+
+    .select-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .select-header .logotype {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+      opacity: 0.9;
+    }
+
+    .select-header h1 {
+      font-size: clamp(32px, 6vw, 54px);
+      font-weight: 900;
+      letter-spacing: -2px;
+      color: var(--text);
+      margin-bottom: 12px;
+      line-height: 1.05;
+    }
+
+    .select-header p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 380px;
+      margin: 0 auto;
+      font-weight: 400;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+      padding-left: 2px;
+    }
+
+    .tier-group { margin-bottom: 24px; }
+
+    .levels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+      gap: 8px;
+    }
+
+    /* Level card */
+    .level-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 14px 14px;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.15s ease;
+      position: relative;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .level-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .level-card .top-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .easy   .top-bar { background: var(--easy); }
+    .medium .top-bar { background: var(--medium); }
+    .hard   .top-bar { background: var(--hard); }
+    .expert .top-bar { background: var(--expert); }
+
+    .level-card:active { transform: scale(0.95); }
+
+    @media (hover: hover) {
+      .level-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+        border-color: var(--border2);
+        background: var(--surface2);
+      }
+    }
+
+    .lc-done {
+      position: absolute;
+      top: 11px; right: 12px;
+      font-size: 12px;
+      color: var(--easy);
+      opacity: 0.9;
+    }
+
+    .lc-num {
+      font-size: 36px;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 6px;
+      letter-spacing: -1px;
+    }
+
+    .easy   .lc-num { color: var(--easy); }
+    .medium .lc-num { color: var(--medium); }
+    .hard   .lc-num { color: var(--hard); }
+    .expert .lc-num { color: var(--expert); }
+
+    .lc-name {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .lc-stars { font-size: 10px; letter-spacing: 0.5px; opacity: 0.7; }
+    .easy   .lc-stars { color: var(--easy); }
+    .medium .lc-stars { color: var(--medium); }
+    .hard   .lc-stars { color: var(--hard); }
+    .expert .lc-stars { color: var(--expert); }
+
+    .lc-best {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    .lc-best strong { color: var(--text2); font-weight: 700; }
+
+    /* ─── GAME SCREEN ───────────────────────────────────────────── */
+    #screen-game {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 18px 18px 28px;
+    }
+
+    #screen-game.active { display: flex; }
+
+    .game-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-shrink: 0;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      border-radius: var(--radius-md);
+      padding: 10px 15px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .btn-ghost:active { border-color: var(--border2); color: var(--text); }
+    @media (hover: hover) { .btn-ghost:hover { border-color: var(--border2); color: var(--text); } }
+
+    .game-meta { flex: 1; min-width: 0; }
+
+    .game-lvl-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .game-diff-label {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    .game-stats { display: flex; gap: 7px; flex-shrink: 0; }
+
+    .stat-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 8px 13px;
+      text-align: center;
+      min-width: 60px;
+    }
+
+    .sp-val {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sp-lbl {
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      margin-top: 2px;
+    }
+
+    .board-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+    }
+
+    .board-shell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 10px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+
+    .board {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .tile {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--tile);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      font-weight: 800;
+      color: var(--text);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      transition: transform 0.13s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+      letter-spacing: -0.5px;
+    }
+
+    .tile:active { background: var(--tile-hi); }
+
+    .game-footer {
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-action {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius-lg);
+      padding: 15px 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.12s, transform 0.1s;
+    }
+
+    .btn-action:active { transform: scale(0.97); background: var(--surface2); }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .btn-primary:active { background: var(--accent2); transform: scale(0.97); }
+
+    @media (hover: hover) {
+      .btn-action:hover:not(.btn-primary) { border-color: var(--border2); }
+      .btn-primary:hover { background: var(--accent2); }
+    }
+
+    /* ─── WIN SCREEN ────────────────────────────────────────────── */
+    #screen-win {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 36px 24px;
+      text-align: center;
+    }
+
+    #screen-win.active { display: flex; }
+
+    .win-emoji {
+      font-size: 72px;
+      margin-bottom: 20px;
+      animation: popIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0) rotate(-10deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+    }
+
+    .win-headline {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .win-sub {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 32px;
+      font-weight: 500;
+    }
+
+    .win-stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .win-stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px 26px;
+      min-width: 116px;
+    }
+
+    .wsc-val {
+      font-size: 38px;
+      font-weight: 900;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -1px;
+    }
+
+    .wsc-lbl {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      margin-top: 5px;
+    }
+
+    .win-record {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--easy);
+      margin-bottom: 32px;
+      min-height: 18px;
+    }
+
+    .win-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      width: 100%;
+      max-width: 290px;
+    }
+
+    /* ─── CONFETTI ──────────────────────────────────────────────── */
+    #confetti {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 999;
+    }
+
+    .cp {
+      position: absolute;
+      border-radius: 2px;
+      animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+      from { opacity: 1; transform: translateY(-10px) rotate(0deg) scale(1); }
+      to   { opacity: 0; transform: translateY(105vh) rotate(780deg) scale(0.5); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SELECIONAR NÍVEL -->
+<div id="screen-select" class="screen active">
+  <div class="select-header">
+    <div class="logotype">Slide Puzzle</div>
+    <h1>Qual nível<br>vamos jogar?</h1>
+    <p>Deslize as peças para ordenar os números de 1 a 15. O espaço vazio deve ficar no canto inferior direito.</p>
+  </div>
+  <div id="levelsGrid"></div>
+</div>
+
+<!-- JOGO -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <button class="btn-ghost" id="btnBack">← Voltar</button>
+    <div class="game-meta">
+      <div class="game-lvl-label" id="gameLvl">Nível 1</div>
+      <div class="game-diff-label" id="gameDiff"></div>
+    </div>
+    <div class="game-stats">
+      <div class="stat-pill">
+        <div class="sp-val" id="statMoves">0</div>
+        <div class="sp-lbl">Jogadas</div>
+      </div>
+      <div class="stat-pill">
+        <div class="sp-val" id="statTime">0:00</div>
+        <div class="sp-lbl">Tempo</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="board-area">
+    <div class="board-shell" id="boardShell">
+      <div class="board" id="board"></div>
+    </div>
+  </div>
+
+  <div class="game-footer">
+    <button class="btn-action" id="btnRestart">↺ Reiniciar</button>
+    <button class="btn-action btn-primary" id="btnShuffle">🔀 Embaralhar</button>
+  </div>
+</div>
+
+<!-- VITÓRIA -->
+<div id="screen-win" class="screen">
+  <div id="confetti"></div>
+  <div class="win-emoji" id="winEmoji">🎉</div>
+  <div class="win-headline">Resolvido!</div>
+  <div class="win-sub" id="winSub">Nível 1 completo!</div>
+  <div class="win-stats-row">
+    <div class="win-stat-card">
+      <div class="wsc-val" id="winMoves">0</div>
+      <div class="wsc-lbl">Jogadas</div>
+    </div>
+    <div class="win-stat-card">
+      <div class="wsc-val" id="winTime">0:00</div>
+      <div class="wsc-lbl">Tempo</div>
+    </div>
+  </div>
+  <div class="win-record" id="winRecord"></div>
+  <div class="win-btns">
+    <button class="btn-action btn-primary" id="btnNext">Próximo nível →</button>
+    <button class="btn-action" id="btnReplay">↺ Jogar novamente</button>
+    <button class="btn-action" id="btnMenu">☰ Menu de níveis</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════
+   ÁUDIO  —  sons suaves e simpáticos
+═══════════════════════════════════════════════════════ */
+let _ctx = null;
+function ac() {
+  if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
+  return _ctx;
+}
+
+function nota(freq, freqFim, dur, vol, tipo, quando) {
+  tipo    = tipo    || 'sine';
+  quando  = quando  || 0;
+  var ctx = ac();
+  var t   = ctx.currentTime + quando;
+  var osc = ctx.createOscillator();
+  var g   = ctx.createGain();
+  osc.connect(g); g.connect(ctx.destination);
+  osc.type = tipo;
+  osc.frequency.setValueAtTime(freq, t);
+  if (freqFim !== freq) osc.frequency.exponentialRampToValueAtTime(freqFim, t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  osc.start(t); osc.stop(t + dur + 0.01);
+}
+
+function sndDeslizar()  { nota(680, 460, 0.08, 0.15); }
+function sndBotao()     { nota(380, 340, 0.04, 0.09); }
+function sndVitoria()   { [523,659,784,1047,1319].forEach(function(f,i){ nota(f,f,0.32,0.20,'sine',i*0.10); }); }
+function sndRecorde()   { [523,659,784,1047,784,1047,1319].forEach(function(f,i){ nota(f,f*1.04,0.22,0.18,'sine',i*0.08); }); }
+
+/* ═══════════════════════════════════════════════════════
+   GERAÇÃO DE NÍVEIS  —  PRNG determinístico por semente
+═══════════════════════════════════════════════════════ */
+function prng(semente) {
+  return function() {
+    semente |= 0;
+    semente  = semente + 0x6D2B79F5 | 0;
+    var t    = Math.imul(semente ^ (semente >>> 15), 1 | semente);
+    t        = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function gerarNivel(n) {
+  var rand     = prng(n * 9973 + 31337);
+  var tabuleiro = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0];
+  var vazio    = 15;
+  var passos   = 22 + Math.round((n - 1) * 4.6); // 22 a ~202
+  var ultimo   = -1;
+  for (var i = 0; i < passos; i++) {
+    var r  = vazio >> 2, c = vazio & 3;
+    var nb = [];
+    if (r > 0) nb.push(vazio - 4);
+    if (r < 3) nb.push(vazio + 4);
+    if (c > 0) nb.push(vazio - 1);
+    if (c < 3) nb.push(vazio + 1);
+    var ok   = nb.filter(function(x) { return x !== ultimo; });
+    var prox = ok[Math.floor(rand() * ok.length)];
+    var tmp  = tabuleiro[vazio];
+    tabuleiro[vazio] = tabuleiro[prox];
+    tabuleiro[prox]  = tmp;
+    ultimo = vazio;
+    vazio  = prox;
+  }
+  return { tabuleiro: tabuleiro, vazio: vazio };
+}
+
+var RESOLVIDO = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0];
+
+/* ═══════════════════════════════════════════════════════
+   METADADOS DE DIFICULDADE
+═══════════════════════════════════════════════════════ */
+function dificuldade(n) {
+  if (n <= 10) return { nome: 'Iniciante', cls: 'easy',   estrelas: '★☆☆☆', emoji: '🎉' };
+  if (n <= 20) return { nome: 'Médio',     cls: 'medium', estrelas: '★★☆☆', emoji: '🏅' };
+  if (n <= 30) return { nome: 'Difícil',   cls: 'hard',   estrelas: '★★★☆', emoji: '🔥' };
+  return               { nome: 'Expert',   cls: 'expert', estrelas: '★★★★', emoji: '👑' };
+}
+
+/* ═══════════════════════════════════════════════════════
+   ESTADO DO JOGO
+═══════════════════════════════════════════════════════ */
+var nivelAtual  = 1;
+var tabuleiro   = RESOLVIDO.slice();
+var vazio       = 15;
+var tabInicial  = RESOLVIDO.slice();
+var vazioInicial = 15;
+var jogadas     = 0;
+var segundos    = 0;
+var cronometro  = null;
+var tamPeca     = 100; // calculado
+
+/* ═══════════════════════════════════════════════════════
+   TELAS
+═══════════════════════════════════════════════════════ */
+var telas = {
+  selecionar: document.getElementById('screen-select'),
+  jogo:       document.getElementById('screen-game'),
+  vitoria:    document.getElementById('screen-win'),
+};
+
+function mostrar(nome) {
+  Object.keys(telas).forEach(function(k) {
+    telas[k].classList.toggle('active', k === nome);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   MENU DE NÍVEIS
+═══════════════════════════════════════════════════════ */
+var TIERS = [
+  { inicio: 1,  fim: 10, cls: 'easy',   nome: 'Iniciante' },
+  { inicio: 11, fim: 20, cls: 'medium', nome: 'Médio'     },
+  { inicio: 21, fim: 30, cls: 'hard',   nome: 'Difícil'   },
+  { inicio: 31, fim: 40, cls: 'expert', nome: 'Expert'    },
+];
+
+function construirMenu() {
+  var container = document.getElementById('levelsGrid');
+  container.innerHTML = '';
+
+  TIERS.forEach(function(tier) {
+    var grupo = document.createElement('div');
+    grupo.className = 'tier-group';
+
+    var label = document.createElement('div');
+    label.className = 'section-label';
+    label.textContent = tier.nome + ' — Níveis ' + tier.inicio + ' a ' + tier.fim;
+    grupo.appendChild(label);
+
+    var grid = document.createElement('div');
+    grid.className = 'levels-grid';
+
+    for (var i = tier.inicio; i <= tier.fim; i++) {
+      (function(n) {
+        var d      = dificuldade(n);
+        var melhor = localStorage.getItem('sp_melhor_' + n);
+        var feito  = localStorage.getItem('sp_feito_' + n);
+
+        var card = document.createElement('div');
+        card.className = 'level-card ' + d.cls;
+        card.innerHTML =
+          '<div class="top-bar"></div>' +
+          (feito ? '<div class="lc-done">✓</div>' : '') +
+          '<div class="lc-num">' + n + '</div>' +
+          '<div class="lc-name">' + d.nome + '</div>' +
+          '<div class="lc-stars">' + d.estrelas + '</div>' +
+          (melhor ? '<div class="lc-best">Recorde: <strong>' + melhor + '</strong></div>' : '');
+
+        card.addEventListener('click', function() { sndBotao(); iniciarNivel(n); });
+        grid.appendChild(card);
+      })(i);
+    }
+
+    grupo.appendChild(grid);
+    container.appendChild(grupo);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   TABULEIRO DOM  —  elementos persistentes por peça
+═══════════════════════════════════════════════════════ */
+var quadro  = document.getElementById('board');
+var pecas   = {}; // pecas[num] = elemento div
+
+function iniciarDOM() {
+  quadro.innerHTML = '';
+  for (var n = 1; n <= 15; n++) {
+    var el = document.createElement('div');
+    el.className  = 'tile';
+    el.textContent = n;
+    el.dataset.num = n;
+    el.addEventListener('click', (function(num) {
+      return function() { tocarPeca(num); };
+    })(n));
+    quadro.appendChild(el);
+    pecas[n] = el;
+  }
+}
+
+function redimensionar() {
+  var shell  = document.getElementById('boardShell');
+  var area   = document.querySelector('.board-area');
+  var aw     = area.clientWidth  - 44;
+  var ah     = area.clientHeight - 20;
+  var lado   = Math.min(aw, ah, 480, Math.max(220, aw));
+  tamPeca    = Math.floor(lado / 4);
+  var grade  = tamPeca * 4;
+  quadro.style.width  = grade + 'px';
+  quadro.style.height = grade + 'px';
+  shell.style.width   = (grade + 20) + 'px';
+  var fonte = Math.round(tamPeca * 0.34);
+  Object.values(pecas).forEach(function(el) {
+    el.style.width    = tamPeca + 'px';
+    el.style.height   = tamPeca + 'px';
+    el.style.fontSize = fonte + 'px';
+  });
+  renderizar(false);
+}
+
+function renderizar(animado) {
+  if (!animado) {
+    Object.values(pecas).forEach(function(el) { el.style.transition = 'none'; });
+    quadro.offsetHeight; // forçar reflow
+  }
+  tabuleiro.forEach(function(num, idx) {
+    if (num === 0) return;
+    var r = idx >> 2, c = idx & 3;
+    pecas[num].style.transform = 'translate(' + (c * tamPeca) + 'px,' + (r * tamPeca) + 'px)';
+  });
+  if (!animado) {
+    requestAnimationFrame(function() {
+      Object.values(pecas).forEach(function(el) { el.style.transition = ''; });
+    });
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   LÓGICA DO JOGO
+═══════════════════════════════════════════════════════ */
+function tocarPeca(num) {
+  var idx = tabuleiro.indexOf(num);
+  if (!adjacente(idx, vazio)) return;
+  mover(idx);
+}
+
+function adjacente(a, b) {
+  return Math.abs((a >> 2) - (b >> 2)) + Math.abs((a & 3) - (b & 3)) === 1;
+}
+
+function mover(idxPeca) {
+  tabuleiro[vazio]    = tabuleiro[idxPeca];
+  tabuleiro[idxPeca]  = 0;
+  vazio               = idxPeca;
+  jogadas++;
+  renderizar(true);
+  atualizarStats();
+  sndDeslizar();
+  if (resolvido()) setTimeout(vitoria, 220);
+}
+
+function resolvido() {
+  for (var i = 0; i < 16; i++) if (tabuleiro[i] !== RESOLVIDO[i]) return false;
+  return true;
+}
+
+/* ═══════════════════════════════════════════════════════
+   GESTOS DE DESLIZE
+═══════════════════════════════════════════════════════ */
+var toqueInicio = null;
+
+quadro.addEventListener('touchstart', function(e) {
+  toqueInicio = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+
+quadro.addEventListener('touchend', function(e) {
+  if (!toqueInicio) return;
+  var dx  = e.changedTouches[0].clientX - toqueInicio.x;
+  var dy  = e.changedTouches[0].clientY - toqueInicio.y;
+  toqueInicio = null;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < 18) return;
+  var r = vazio >> 2, c = vazio & 3, alvo = -1;
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    if (dx > 0 && c > 0) alvo = vazio - 1;
+    if (dx < 0 && c < 3) alvo = vazio + 1;
+  } else {
+    if (dy > 0 && r > 0) alvo = vazio - 4;
+    if (dy < 0 && r < 3) alvo = vazio + 4;
+  }
+  if (alvo >= 0) mover(alvo);
+}, { passive: true });
+
+/* ═══════════════════════════════════════════════════════
+   TECLADO
+═══════════════════════════════════════════════════════ */
+document.addEventListener('keydown', function(e) {
+  if (!telas.jogo.classList.contains('active')) return;
+  var r = vazio >> 2, c = vazio & 3, alvo = -1;
+  if (e.key === 'ArrowLeft'  && c < 3) alvo = vazio + 1;
+  if (e.key === 'ArrowRight' && c > 0) alvo = vazio - 1;
+  if (e.key === 'ArrowUp'    && r < 3) alvo = vazio + 4;
+  if (e.key === 'ArrowDown'  && r > 0) alvo = vazio - 4;
+  if (alvo >= 0) { e.preventDefault(); mover(alvo); }
+  if (e.key === 'r' || e.key === 'R') document.getElementById('btnRestart').click();
+});
+
+/* ═══════════════════════════════════════════════════════
+   CRONÔMETRO E ESTATÍSTICAS
+═══════════════════════════════════════════════════════ */
+function iniciarCronometro() {
+  pararCronometro();
+  cronometro = setInterval(function() { segundos++; exibirTempo(); }, 1000);
+}
+
+function pararCronometro() { clearInterval(cronometro); cronometro = null; }
+
+function exibirTempo() {
+  var m = Math.floor(segundos / 60), s = segundos % 60;
+  document.getElementById('statTime').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function formTempo(s) {
+  var m = Math.floor(s / 60), seg = s % 60;
+  return m + ':' + (seg < 10 ? '0' : '') + seg;
+}
+
+function atualizarStats() {
+  document.getElementById('statMoves').textContent = jogadas;
+}
+
+/* ═══════════════════════════════════════════════════════
+   INICIAR NÍVEL
+═══════════════════════════════════════════════════════ */
+function iniciarNivel(n) {
+  nivelAtual  = n;
+  var gen     = gerarNivel(n);
+  tabuleiro   = gen.tabuleiro;
+  vazio       = gen.vazio;
+  tabInicial  = gen.tabuleiro.slice();
+  vazioInicial = gen.vazio;
+  jogadas     = 0;
+  segundos    = 0;
+  pararCronometro();
+
+  var d = dificuldade(n);
+  document.getElementById('gameLvl').textContent  = 'Nível ' + n + ' de 40';
+  document.getElementById('gameDiff').textContent = d.estrelas + '  ' + d.nome;
+  document.getElementById('gameDiff').style.color = getComputedStyle(document.documentElement)
+    .getPropertyValue('--' + d.cls).trim();
+
+  atualizarStats();
+  exibirTempo();
+  mostrar('jogo');
+
+  requestAnimationFrame(function() {
+    redimensionar();
+    renderizar(false);
+    iniciarCronometro();
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   VITÓRIA
+═══════════════════════════════════════════════════════ */
+function vitoria() {
+  pararCronometro();
+
+  var chave      = 'sp_melhor_' + nivelAtual;
+  var anterior   = localStorage.getItem(chave);
+  var novoRecord = !anterior || jogadas < parseInt(anterior);
+  if (novoRecord) localStorage.setItem(chave, jogadas);
+  localStorage.setItem('sp_feito_' + nivelAtual, '1');
+
+  document.getElementById('winEmoji').textContent  = dificuldade(nivelAtual).emoji;
+  document.getElementById('winSub').textContent    = 'Nível ' + nivelAtual + ' completo!';
+  document.getElementById('winMoves').textContent  = jogadas;
+  document.getElementById('winTime').textContent   = formTempo(segundos);
+  document.getElementById('winRecord').textContent = novoRecord
+    ? '🏆 Novo recorde!'
+    : (anterior ? 'Seu recorde: ' + anterior + ' jogadas' : '');
+
+  var btnProx = document.getElementById('btnNext');
+  if (nivelAtual < 40) {
+    btnProx.style.display  = '';
+    btnProx.textContent    = 'Nível ' + (nivelAtual + 1) + ' →';
+  } else {
+    btnProx.style.display = 'none';
+  }
+
+  confetes();
+  if (novoRecord) sndRecorde(); else sndVitoria();
+  mostrar('vitoria');
+  construirMenu();
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONFETES
+═══════════════════════════════════════════════════════ */
+function confetes() {
+  var c   = document.getElementById('confetti');
+  c.innerHTML = '';
+  var cores = ['#d97757','#a78bfa','#60a5fa','#34d399','#facc15','#e879f9','#73c48a'];
+  for (var i = 0; i < 75; i++) {
+    var p  = document.createElement('div');
+    p.className = 'cp';
+    var w  = 7 + Math.random() * 9;
+    var h  = w * (0.5 + Math.random() * 0.8);
+    p.style.cssText = [
+      'left:'               + Math.random() * 100 + '%',
+      'width:'              + w + 'px',
+      'height:'             + h + 'px',
+      'background:'         + cores[Math.floor(Math.random() * cores.length)],
+      'animation-duration:' + (1.6 + Math.random() * 2.2) + 's',
+      'animation-delay:'    + Math.random() * 0.7 + 's',
+      'border-radius:'      + (Math.random() > 0.5 ? '50%' : '2px'),
+    ].join(';');
+    c.appendChild(p);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   BOTÕES
+═══════════════════════════════════════════════════════ */
+document.getElementById('btnBack').addEventListener('click', function() {
+  sndBotao(); pararCronometro(); mostrar('selecionar');
+});
+
+document.getElementById('btnRestart').addEventListener('click', function() {
+  sndBotao();
+  tabuleiro = tabInicial.slice();
+  vazio     = vazioInicial;
+  jogadas   = 0; segundos = 0;
+  pararCronometro(); iniciarCronometro();
+  atualizarStats(); exibirTempo();
+  renderizar(false);
+});
+
+document.getElementById('btnShuffle').addEventListener('click', function() {
+  sndBotao(); iniciarNivel(nivelAtual);
+});
+
+document.getElementById('btnNext').addEventListener('click', function() {
+  if (nivelAtual < 40) iniciarNivel(nivelAtual + 1);
+});
+
+document.getElementById('btnReplay').addEventListener('click', function() {
+  iniciarNivel(nivelAtual);
+});
+
+document.getElementById('btnMenu').addEventListener('click', function() {
+  sndBotao(); mostrar('selecionar');
+});
+
+window.addEventListener('resize', function() {
+  if (telas.jogo.classList.contains('active')) redimensionar();
+});
+
+/* ═══════════════════════════════════════════════════════
+   INICIALIZAR
+═══════════════════════════════════════════════════════ */
+iniciarDOM();
+construirMenu();
+// Auto-start via URL: ?nivel=3
+(function() {
+  var m = location.search.match(/[?&]nivel=(\d+)/);
+  if (m) iniciarNivel(Math.min(40, Math.max(1, parseInt(m[1]))));
+})();
+</script>
+</body>
+</html>
