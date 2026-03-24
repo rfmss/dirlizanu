@@ -579,7 +579,7 @@ var IC_ARROW_RIGHT  = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height
 /* ═══════════════════════════════════════════════════════
    ÁUDIO  —  sons suaves e simpáticos
 ═══════════════════════════════════════════════════════ */
-let _ctx = null;
+var _ctx = null;
 function ac() {
   if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
   return _ctx;
@@ -1036,6 +1036,10 @@ construirMenu();
   var m = location.search.match(/[?&]nivel=(\d+)/);
   if (m) iniciarNivel(Math.min(40, Math.max(1, parseInt(m[1]))));
 })();
+</script>
+<script>
+var BG = ['#b2c9c3','#c9bfb0','#b8c4ce','#c4bac9','#c9c4b0','#b8c9b8','#cec0b4'];
+document.body.style.backgroundColor = BG[Math.floor(Math.random() * BG.length)];
 </script>
 </body>
 </html>
