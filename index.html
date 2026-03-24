@@ -946,7 +946,7 @@ function vitoria() {
   document.getElementById('winSub').textContent    = 'Nível ' + nivelAtual + ' completo!';
   document.getElementById('winMoves').textContent  = jogadas;
   document.getElementById('winTime').textContent   = formTempo(segundos);
-  document.getElementById('winRecord').textContent = novoRecord
+  document.getElementById('winRecord').innerHTML = novoRecord
     ? IC_TROPHY_SM + ' Novo recorde!'
     : (anterior ? 'Seu recorde: ' + anterior + ' jogadas' : '');
 
