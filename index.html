@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Slide Puzzle</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -39,7 +38,7 @@
       height: 100%;
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
@@ -487,7 +486,7 @@
 <!-- JOGO -->
 <div id="screen-game" class="screen">
   <div class="game-header">
-    <button class="btn-ghost" id="btnBack">← Voltar</button>
+    <button class="btn-ghost" id="btnBack"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H59.31l58.35,58.34a8,8,0,0,1-11.32,11.32l-72-72a8,8,0,0,1,0-11.32l72-72a8,8,0,0,1,11.32,11.32L59.31,120H216A8,8,0,0,1,224,128Z"/></svg> Voltar</button>
     <div class="game-meta">
       <div class="game-lvl-label" id="gameLvl">Nível 1</div>
       <div class="game-diff-label" id="gameDiff"></div>
@@ -511,15 +510,15 @@
   </div>
 
   <div class="game-footer">
-    <button class="btn-action" id="btnRestart">↺ Reiniciar</button>
-    <button class="btn-action btn-primary" id="btnShuffle">🔀 Embaralhar</button>
+    <button class="btn-action" id="btnRestart"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 256 256" fill="currentColor"><path d="M224,48V96a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h28.69L182.06,73.37a79.56,79.56,0,0,0-56.13-23.43C91.34,49.94,63,67.28,48.37,94.1a8,8,0,0,1-13.85-8C51,57.5,83.39,34,126,34a95.43,95.43,0,0,1,67.17,28L208,47.31V48A8,8,0,0,1,224,48ZM205.48,157.9a80,80,0,0,1-79.54,50.19c-33.49,0-61.86-17.34-76.5-44.16L77.31,148H106a8,8,0,0,0,0-16H58a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V159.31l14.69,14.62A95.42,95.42,0,0,0,125.87,222c1.37,0,2.74,0,4.11,0a95.4,95.4,0,0,0,88.35-59.89,8,8,0,0,0-12.85-8.21Z"/></svg> Reiniciar</button>
+    <button class="btn-action btn-primary" id="btnShuffle"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,181.66l-32,32a8,8,0,0,1-11.32-11.32L204.69,184H192c-26.26,0-45.56-15.93-64.88-32.62C109.33,135.93,90.33,120,64,120H32a8,8,0,0,1,0-16H64c26.26,0,45.56,15.93,64.88,32.62C146.67,152.07,166.67,168,192,168h12.69l-18.35-18.34a8,8,0,0,1,11.32-11.32Zm-102.29-51c17.42-15.23,39.42-34.66,64.63-34.66h12.69l-18.35,18.34a8,8,0,0,0,11.32,11.32l32-32a8,8,0,0,0,0-11.32l-32-32a8,8,0,0,0-11.32,11.32L204.69,80H192c-34.44,0-58,20.71-76.67,37.64C108.79,123.56,94,136,73.45,136H32a8,8,0,0,0,0,16H73.45C99.34,152,119.44,137.56,127.37,130.66Z"/></svg> Embaralhar</button>
   </div>
 </div>
 
 <!-- VITÓRIA -->
 <div id="screen-win" class="screen">
   <div id="confetti"></div>
-  <div class="win-emoji" id="winEmoji">🎉</div>
+  <div class="win-emoji" id="winEmoji"></div>
   <div class="win-headline">Resolvido!</div>
   <div class="win-sub" id="winSub">Nível 1 completo!</div>
   <div class="win-stats-row">
@@ -534,14 +533,21 @@
   </div>
   <div class="win-record" id="winRecord"></div>
   <div class="win-btns">
-    <button class="btn-action btn-primary" id="btnNext">Próximo nível →</button>
-    <button class="btn-action" id="btnReplay">↺ Jogar novamente</button>
-    <button class="btn-action" id="btnMenu">☰ Menu de níveis</button>
+    <button class="btn-action btn-primary" id="btnNext">Próximo nível <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M221.66,122.34l-72-72a8,8,0,0,0-11.32,11.32L196.69,120H40a8,8,0,0,0,0,16H196.69l-58.35,58.34a8,8,0,0,0,11.32,11.32l72-72A8,8,0,0,0,221.66,122.34Z"/></svg></button>
+    <button class="btn-action" id="btnReplay"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 256 256" fill="currentColor"><path d="M224,48V96a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h28.69L182.06,73.37a79.56,79.56,0,0,0-56.13-23.43C91.34,49.94,63,67.28,48.37,94.1a8,8,0,0,1-13.85-8C51,57.5,83.39,34,126,34a95.43,95.43,0,0,1,67.17,28L208,47.31V48A8,8,0,0,1,224,48ZM205.48,157.9a80,80,0,0,1-79.54,50.19c-33.49,0-61.86-17.34-76.5-44.16L77.31,148H106a8,8,0,0,0,0-16H58a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V159.31l14.69,14.62A95.42,95.42,0,0,0,125.87,222c1.37,0,2.74,0,4.11,0a95.4,95.4,0,0,0,88.35-59.89,8,8,0,0,0-12.85-8.21Z"/></svg> Jogar novamente</button>
+    <button class="btn-action" id="btnMenu"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"/></svg> Menu de níveis</button>
   </div>
 </div>
 
 <script>
 'use strict';
+
+/* ═══════════════════════════════════════════════════════
+   ÍCONES INLINE — Phosphor (sem CDN externo)
+═══════════════════════════════════════════════════════ */
+var IC_TROPHY       = '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 256 256" fill="currentColor"><path d="M232,64H208V48a8,8,0,0,0-8-8H56a8,8,0,0,0-8,8V64H24A16,16,0,0,0,8,80v16a40,40,0,0,0,40,40H60.2A80.1,80.1,0,0,0,120,176.8V200H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V176.8A80.1,80.1,0,0,0,195.8,136H208a40,40,0,0,0,40-40V80A16,16,0,0,0,232,64ZM48,120A24,24,0,0,1,24,96V80H48v32C48,114.82,48,117.42,48,120ZM192,112a64,64,0,0,1-128,0V56H192Zm40-16a24,24,0,0,1-24,24V80h24Z"/></svg>';
+var IC_TROPHY_SM    = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M232,64H208V48a8,8,0,0,0-8-8H56a8,8,0,0,0-8,8V64H24A16,16,0,0,0,8,80v16a40,40,0,0,0,40,40H60.2A80.1,80.1,0,0,0,120,176.8V200H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V176.8A80.1,80.1,0,0,0,195.8,136H208a40,40,0,0,0,40-40V80A16,16,0,0,0,232,64ZM48,120A24,24,0,0,1,24,96V80H48v32C48,114.82,48,117.42,48,120ZM192,112a64,64,0,0,1-128,0V56H192Zm40-16a24,24,0,0,1-24,24V80h24Z"/></svg>';
+var IC_ARROW_RIGHT  = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M221.66,122.34l-72-72a8,8,0,0,0-11.32,11.32L196.69,120H40a8,8,0,0,0,0,16H196.69l-58.35,58.34a8,8,0,0,0,11.32,11.32l72-72A8,8,0,0,0,221.66,122.34Z"/></svg>';
 
 /* ═══════════════════════════════════════════════════════
    ÁUDIO  —  sons suaves e simpáticos
@@ -616,10 +622,10 @@ var RESOLVIDO = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0];
    METADADOS DE DIFICULDADE
 ═══════════════════════════════════════════════════════ */
 function dificuldade(n) {
-  if (n <= 10) return { nome: 'Iniciante', cls: 'easy',   estrelas: '★☆☆☆', emoji: '🎉' };
-  if (n <= 20) return { nome: 'Médio',     cls: 'medium', estrelas: '★★☆☆', emoji: '🏅' };
-  if (n <= 30) return { nome: 'Difícil',   cls: 'hard',   estrelas: '★★★☆', emoji: '🔥' };
-  return               { nome: 'Expert',   cls: 'expert', estrelas: '★★★★', emoji: '👑' };
+  if (n <= 10) return { nome: 'Iniciante', cls: 'easy',   estrelas: '★☆☆☆', emoji: 'start' };
+  if (n <= 20) return { nome: 'Médio',     cls: 'medium', estrelas: '★★☆☆', emoji: 'star' };
+  if (n <= 30) return { nome: 'Difícil',   cls: 'hard',   estrelas: '★★★☆', emoji: 'hard' };
+  return               { nome: 'Expert',   cls: 'expert', estrelas: '★★★★', emoji: 'expert' };
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -909,18 +915,18 @@ function vitoria() {
   if (novoRecord) localStorage.setItem(chave, jogadas);
   localStorage.setItem('sp_feito_' + nivelAtual, '1');
 
-  document.getElementById('winEmoji').textContent  = dificuldade(nivelAtual).emoji;
+  document.getElementById('winEmoji').innerHTML   = IC_TROPHY;
   document.getElementById('winSub').textContent    = 'Nível ' + nivelAtual + ' completo!';
   document.getElementById('winMoves').textContent  = jogadas;
   document.getElementById('winTime').textContent   = formTempo(segundos);
   document.getElementById('winRecord').textContent = novoRecord
-    ? '🏆 Novo recorde!'
+    ? IC_TROPHY_SM + ' Novo recorde!'
     : (anterior ? 'Seu recorde: ' + anterior + ' jogadas' : '');
 
   var btnProx = document.getElementById('btnNext');
   if (nivelAtual < 40) {
     btnProx.style.display  = '';
-    btnProx.textContent    = 'Nível ' + (nivelAtual + 1) + ' →';
+    btnProx.innerHTML      = 'Nível ' + (nivelAtual + 1) + ' ' + IC_ARROW_RIGHT;
   } else {
     btnProx.style.display = 'none';
   }
