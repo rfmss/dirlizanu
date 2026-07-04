@@ -557,6 +557,7 @@ if (!Object.entries) {
   <div class="game-footer">
     <button class="btn-action" id="btnRestart"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 256 256" fill="currentColor"><path d="M224,48V96a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h28.69L182.06,73.37a79.56,79.56,0,0,0-56.13-23.43C91.34,49.94,63,67.28,48.37,94.1a8,8,0,0,1-13.85-8C51,57.5,83.39,34,126,34a95.43,95.43,0,0,1,67.17,28L208,47.31V48A8,8,0,0,1,224,48ZM205.48,157.9a80,80,0,0,1-79.54,50.19c-33.49,0-61.86-17.34-76.5-44.16L77.31,148H106a8,8,0,0,0,0-16H58a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V159.31l14.69,14.62A95.42,95.42,0,0,0,125.87,222c1.37,0,2.74,0,4.11,0a95.4,95.4,0,0,0,88.35-59.89,8,8,0,0,0-12.85-8.21Z"/></svg> Reiniciar</button>
     <button class="btn-action btn-primary" id="btnShuffle"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,181.66l-32,32a8,8,0,0,1-11.32-11.32L204.69,184H192c-26.26,0-45.56-15.93-64.88-32.62C109.33,135.93,90.33,120,64,120H32a8,8,0,0,1,0-16H64c26.26,0,45.56,15.93,64.88,32.62C146.67,152.07,166.67,168,192,168h12.69l-18.35-18.34a8,8,0,0,1,11.32-11.32Zm-102.29-51c17.42-15.23,39.42-34.66,64.63-34.66h12.69l-18.35,18.34a8,8,0,0,0,11.32,11.32l32-32a8,8,0,0,0,0-11.32l-32-32a8,8,0,0,0-11.32,11.32L204.69,80H192c-34.44,0-58,20.71-76.67,37.64C108.79,123.56,94,136,73.45,136H32a8,8,0,0,0,0,16H73.45C99.34,152,119.44,137.56,127.37,130.66Z"/></svg> Embaralhar</button>
+    <button class="btn-action" id="btnFundo" title="Mostrar ou esconder a imagem nas peças">🖼 Fundo</button>
   </div>
 </div>
 
@@ -758,8 +759,46 @@ function construirMenu() {
 var quadro  = document.getElementById('board');
 var pecas   = {}; // pecas[num] = elemento div
 
-var EMOJIS_FLUENT = ['robot', 'alien', 'ghost', 'invader', 'heartfire'];
+/* ── Fundo Fluent nas peças (opcional, animado quando suportado) ── */
+var EMOJIS_FLUENT = ['robot', 'alien', 'ghost', 'invader', 'heartfire', 'fox'];
 var emojiDaPartida = EMOJIS_FLUENT[Math.floor(Math.random() * EMOJIS_FLUENT.length)];
+var ANIM_OK = false;
+var fundoLigado = true;
+try { fundoLigado = localStorage.getItem('dz_fundo') !== 'off'; } catch (e) {}
+
+// detecção de WebP animado: com suporte usa .webp (animado); sem, .png estático
+(function () {
+  var img = new Image();
+  img.onload = function () { if (img.width > 0) { ANIM_OK = true; aplicarFundo(); } };
+  img.src = 'data:image/webp;base64,UklGRlIAAABXRUJQVlA4WAoAAAASAAAAAAAAAAAAQU5JTQYAAAD/////AABBTk1GJgAAAAAAAAAAAAAAAAAAAGQAAABWUDhMDQAAAC8AAAAQBxAREYiI/gcA';
+})();
+
+function aplicarFundo() {
+  var src = ANIM_OK ? "assets/anim/" + emojiDaPartida + ".webp" : "assets/" + emojiDaPartida + ".png";
+  Object.keys(pecas).forEach(function (n) {
+    var el = pecas[n];
+    var col = (n - 1) % 4, row = (n - 1) >> 2;
+    if (fundoLigado) {
+      el.style.backgroundImage = "linear-gradient(180deg, rgba(255,255,255,0.30), rgba(255,255,255,0) 45%, rgba(0,0,0,0.05)), url('" + src + "')";
+      el.style.backgroundSize = '100% 100%, 400% 400%';
+      el.style.backgroundPosition = '0 0, ' + (col * 100 / 3) + '% ' + (row * 100 / 3) + '%';
+    } else {
+      el.style.backgroundImage = "linear-gradient(180deg, rgba(255,255,255,0.30), rgba(255,255,255,0) 45%, rgba(0,0,0,0.05))";
+      el.style.backgroundSize = '100% 100%';
+      el.style.backgroundPosition = '0 0';
+    }
+  });
+  var btn = document.getElementById('btnFundo');
+  if (btn) btn.textContent = fundoLigado ? '🖼 Fundo: sim' : '🖼 Fundo: não';
+}
+
+document.getElementById('btnFundo').addEventListener('click', function () {
+  fundoLigado = !fundoLigado;
+  try { localStorage.setItem('dz_fundo', fundoLigado ? 'on' : 'off'); } catch (e) {}
+  // troca a figura ao religar, pra dar novidade
+  if (fundoLigado) emojiDaPartida = EMOJIS_FLUENT[Math.floor(Math.random() * EMOJIS_FLUENT.length)];
+  aplicarFundo();
+});
 
 function iniciarDOM() {
   quadro.innerHTML = '';
@@ -768,17 +807,13 @@ function iniciarDOM() {
     el.className  = 'tile';
     el.textContent = n;
     el.dataset.num = n;
-    // fatia do emoji Fluent: montar o puzzle monta a figura
-    var col = (n - 1) % 4, row = (n - 1) >> 2;
-    el.style.backgroundImage = "linear-gradient(180deg, rgba(255,255,255,0.30), rgba(255,255,255,0) 45%, rgba(0,0,0,0.05)), url('assets/" + emojiDaPartida + ".png')";
-    el.style.backgroundSize = '100% 100%, 400% 400%';
-    el.style.backgroundPosition = '0 0, ' + (col * 100 / 3) + '% ' + (row * 100 / 3) + '%';
     el.addEventListener('click', (function(num) {
       return function() { tocarPeca(num); };
     })(n));
     quadro.appendChild(el);
     pecas[n] = el;
   }
+  aplicarFundo();
 }
 
 function redimensionar() {
