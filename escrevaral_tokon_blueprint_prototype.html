@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Escrevaral — Blue Screen Prototype</title>
+  <style>
+    :root {
+      --ink: #161817;
+      --paper: #f3eee4;
+      --paper-2: #e9e1d4;
+      --cyan: #86c7df;
+      --cyan-strong: #36a7d2;
+      --cyan-pale: #d8f0f8;
+      --orange: #ff5a19;
+      --red: #e31b36;
+      --line: rgba(22, 24, 23, .18);
+      --grid: rgba(34, 132, 172, .16);
+      --shadow: 8px 10px 0 rgba(22, 24, 23, .22);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #171a1d;
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+    }
+
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+
+    .app {
+      position: relative;
+      display: grid;
+      grid-template-columns: 280px minmax(560px, 1fr) 260px;
+      grid-template-rows: 86px minmax(0, 1fr);
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, transparent 0 279px, var(--cyan-strong) 279px 281px, transparent 281px),
+        linear-gradient(90deg, transparent calc(100% - 262px), var(--cyan-strong) calc(100% - 262px) calc(100% - 260px), transparent calc(100% - 260px)),
+        var(--paper);
+    }
+
+    .brand {
+      grid-column: 1;
+      grid-row: 1;
+      padding: 18px 22px;
+      border-right: 2px solid var(--cyan-strong);
+      border-bottom: 1px solid var(--cyan-strong);
+      background: var(--paper);
+    }
+
+    .eyebrow,
+    .micro,
+    .tag,
+    .tool-tab,
+    .table-head,
+    .modal-kicker {
+      font-family: "Courier New", Courier, monospace;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      font-weight: 700;
+    }
+
+    .eyebrow { font-size: 10px; color: #087da9; }
+    .brand h1 {
+      margin: 8px 0 0;
+      font-size: 32px;
+      line-height: .9;
+      letter-spacing: -.04em;
+    }
+    .brand h1 span { color: var(--red); }
+    .brand .micro { margin-top: 12px; font-size: 9px; opacity: .65; }
+
+    .meta {
+      grid-column: 2 / 4;
+      grid-row: 1;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr)) 260px;
+      border-bottom: 1px solid var(--cyan-strong);
+      background: var(--paper);
+    }
+
+    .meta-cell {
+      padding: 13px 15px;
+      border-right: 1px solid rgba(54, 167, 210, .55);
+    }
+    .meta-cell .micro { font-size: 9px; color: #087da9; }
+    .meta-cell strong { display: block; margin-top: 8px; font-size: 12px; }
+
+    .meta-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      font: 700 12px/1.3 "Courier New", monospace;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      background:
+        radial-gradient(circle at 2px 2px, rgba(22, 24, 23, .11) 1px, transparent 1.3px) 0 0/7px 7px,
+        var(--paper);
+    }
+
+    .sidebar {
+      grid-column: 1;
+      grid-row: 2;
+      border-right: 2px solid var(--cyan-strong);
+      background: var(--paper);
+      overflow: hidden;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr 44px;
+      gap: 8px;
+      padding: 14px;
+      border-bottom: 1px solid rgba(54, 167, 210, .45);
+    }
+
+    .search-row input,
+    .search-row button {
+      min-width: 0;
+      height: 42px;
+      border: 1px solid var(--cyan-strong);
+      background: rgba(255,255,255,.35);
+    }
+    .search-row input { padding: 0 12px; }
+    .search-row button { font-size: 22px; cursor: pointer; }
+
+    .doc-list { padding: 10px; }
+    .doc {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 16px 10px 15px 24px;
+      border-bottom: 1px solid rgba(54, 167, 210, .5);
+    }
+    .doc::before {
+      content: "";
+      position: absolute;
+      left: 9px;
+      top: 13px;
+      bottom: 13px;
+      width: 5px;
+      background: #65c5ee;
+      clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%);
+    }
+    .doc.active {
+      color: var(--paper);
+      background: var(--ink);
+      border-bottom: 0;
+    }
+    .doc.active::before { background: var(--orange); }
+    .doc strong { display: block; font-size: 16px; }
+    .doc small { display: block; margin-top: 7px; font: 9px "Courier New", monospace; letter-spacing: .11em; opacity: .65; text-transform: uppercase; }
+    .doc-num { align-self: center; font: 700 13px "Courier New", monospace; color: #0788bd; }
+    .doc.active .doc-num { color: var(--orange); }
+
+    .workspace {
+      grid-column: 2;
+      grid-row: 2;
+      position: relative;
+      min-width: 0;
+      overflow: auto;
+      padding: 42px 42px 70px;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 36px, rgba(54, 167, 210, .11) 36px 37px),
+        linear-gradient(90deg, rgba(240, 236, 225, .94), rgba(245, 241, 232, .92));
+    }
+
+    .sheet {
+      width: min(760px, 100%);
+      min-height: 680px;
+      margin: 0 auto;
+      border: 2px solid #55b6df;
+      background:
+        linear-gradient(90deg, transparent 70px, rgba(72, 177, 220, .25) 70px 72px, transparent 72px),
+        repeating-linear-gradient(0deg, transparent 0 41px, rgba(72, 177, 220, .23) 41px 42px),
+        rgba(249, 246, 238, .9);
+      box-shadow: 18px 16px 0 rgba(57, 156, 198, .09);
+      padding: 50px 70px 60px 90px;
+    }
+
+    .sheet-top {
+      text-align: right;
+      color: #0b88bd;
+      font: 700 10px "Courier New", monospace;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+    }
+
+    .sheet h2 {
+      margin: 26px 0 16px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(36px, 5vw, 58px);
+      line-height: .9;
+      color: rgba(22,24,23,.19);
+      text-transform: uppercase;
+    }
+
+    .rule { height: 5px; background: var(--ink); margin-bottom: 14px; }
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(22,24,23,.25);
+    }
+    .status-left { display: flex; align-items: center; gap: 10px; }
+    .flag {
+      width: 40px;
+      height: 10px;
+      background: var(--red);
+      clip-path: polygon(0 0, 100% 0, 78% 100%, 10% 100%);
+    }
+    .tag { font-size: 9px; opacity: .7; }
+    .tag.blue { color: #0582b6; opacity: 1; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(22,24,23,.25);
+    }
+    .toolbar button {
+      min-width: 34px;
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--ink);
+      background: rgba(243, 238, 228, .9);
+      font: 700 11px "Courier New", monospace;
+      cursor: pointer;
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 410px;
+      resize: vertical;
+      padding: 22px 0;
+      border: 0;
+      outline: 0;
+      color: var(--ink);
+      background: transparent;
+      font: 20px/1.9 "Courier New", monospace;
+    }
+    textarea::placeholder { color: rgba(22,24,23,.24); }
+
+    .tools {
+      grid-column: 3;
+      grid-row: 2;
+      border-left: 0;
+      background:
+        radial-gradient(circle at 2px 2px, rgba(22, 24, 23, .10) 1px, transparent 1.2px) 0 0/7px 7px,
+        var(--paper);
+      overflow: hidden;
+    }
+
+    .tool-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-bottom: 1px solid var(--cyan-strong);
+    }
+    .tool-tab {
+      min-height: 35px;
+      border: 0;
+      border-right: 1px solid rgba(54, 167, 210, .45);
+      border-bottom: 1px solid rgba(54, 167, 210, .45);
+      background: transparent;
+      font-size: 8px;
+      cursor: pointer;
+    }
+    .tool-tab.active { color: var(--paper); background: var(--ink); }
+
+    .tool-copy { padding: 30px 18px; font-size: 13px; line-height: 1.65; color: rgba(22,24,23,.66); }
+    .analyze-button {
+      width: 100%;
+      margin-top: 18px;
+      min-height: 48px;
+      border: 0;
+      color: white;
+      background: var(--red);
+      font: 700 11px "Courier New", monospace;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      cursor: pointer;
+    }
+
+    .screen-wash {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 52px;
+      background:
+        linear-gradient(161deg, transparent 0 57%, rgba(255,255,255,.32) 57.2% 57.5%, transparent 57.7%),
+        linear-gradient(17deg, transparent 0 71%, rgba(255,255,255,.26) 71.2% 71.5%, transparent 71.7%),
+        rgba(118, 197, 226, .91);
+      backdrop-filter: grayscale(1) contrast(.8) brightness(1.05);
+      transition: opacity .18s ease, visibility .18s ease;
+    }
+    .screen-wash[hidden] { opacity: 0; visibility: hidden; pointer-events: none; display: grid; }
+
+    .screen-wash::before,
+    .screen-wash::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .screen-wash::before {
+      background:
+        radial-gradient(circle at 2px 2px, rgba(255,255,255,.28) 1px, transparent 1.2px) 0 0/8px 8px;
+      mix-blend-mode: overlay;
+      opacity: .36;
+    }
+    .screen-wash::after {
+      border: 18px solid rgba(255,255,255,.17);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.52);
+    }
+
+    .analysis-modal {
+      position: relative;
+      width: min(820px, 84vw);
+      min-height: 430px;
+      padding: 32px 42px 34px 52px;
+      border: 3px solid var(--ink);
+      background:
+        radial-gradient(circle at 2px 2px, rgba(22,24,23,.08) 1px, transparent 1.2px) 0 0/9px 9px,
+        var(--paper);
+      box-shadow: var(--shadow);
+      transform: rotate(-.65deg);
+      isolation: isolate;
+      animation: slam .34s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .analysis-modal::before {
+      content: "";
+      position: absolute;
+      left: 16px;
+      top: 0;
+      bottom: 0;
+      border-left: 2px dashed rgba(22,24,23,.6);
+    }
+
+    .modal-kicker { font-size: 10px; color: #5c625f; }
+    .analysis-modal h3 {
+      margin: 8px 0 2px;
+      font-size: clamp(44px, 8vw, 82px);
+      line-height: .82;
+      letter-spacing: -.06em;
+      text-transform: uppercase;
+    }
+    .analysis-modal h3 span { color: var(--orange); }
+    .modal-sub {
+      margin: 12px 0 24px;
+      font-size: 15px;
+      line-height: 1.45;
+      max-width: 620px;
+    }
+
+    .analysis-table {
+      border: 2px solid var(--ink);
+      background: rgba(255,255,255,.26);
+    }
+    .table-head {
+      display: grid;
+      grid-template-columns: 120px 1fr 90px;
+      border-bottom: 2px solid var(--ink);
+      font-size: 9px;
+    }
+    .table-head div,
+    .analysis-row > div { padding: 8px 10px; border-right: 1px solid rgba(22,24,23,.35); }
+    .table-head div:last-child,
+    .analysis-row > div:last-child { border-right: 0; }
+
+    .analysis-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 90px;
+      align-items: stretch;
+      min-height: 58px;
+      border-bottom: 1px solid rgba(22,24,23,.45);
+    }
+    .analysis-row:last-child { border-bottom: 0; }
+    .analysis-row .label {
+      display: flex;
+      align-items: center;
+      font: 700 10px "Courier New", monospace;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .analysis-row .reading {
+      display: flex;
+      align-items: center;
+      font: 15px/1.3 Georgia, serif;
+    }
+    .analysis-row .value {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font: 700 28px "Arial Narrow", Arial, sans-serif;
+    }
+    .analysis-row.active {
+      color: white;
+      background: var(--orange);
+    }
+
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .modal-actions small { font: 10px "Courier New", monospace; text-transform: uppercase; letter-spacing: .09em; }
+    .confirm {
+      min-width: 180px;
+      min-height: 46px;
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: white;
+      font: 700 11px "Courier New", monospace;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      cursor: pointer;
+    }
+
+    .breakout {
+      position: absolute;
+      right: -106px;
+      bottom: 38px;
+      z-index: -1;
+      width: 190px;
+      min-height: 250px;
+      padding: 24px 18px 20px 72px;
+      color: white;
+      background:
+        linear-gradient(150deg, rgba(255,255,255,.14), transparent 42%),
+        var(--red);
+      border: 3px solid var(--ink);
+      clip-path: polygon(18% 0, 100% 8%, 89% 100%, 0 88%, 16% 48%);
+      transform: rotate(4deg);
+      box-shadow: 7px 9px 0 rgba(22,24,23,.23);
+      overflow: hidden;
+    }
+    .breakout::before {
+      content: "“";
+      position: absolute;
+      left: 10px;
+      top: -16px;
+      font: 210px/.8 Georgia, serif;
+      color: rgba(255,255,255,.18);
+    }
+    .breakout .micro { position: relative; font-size: 9px; }
+    .breakout strong {
+      position: relative;
+      display: block;
+      margin-top: 32px;
+      font: 900 58px/.8 "Arial Narrow", Arial, sans-serif;
+      letter-spacing: -.06em;
+    }
+    .breakout p {
+      position: relative;
+      margin: 20px 0 0;
+      font: 700 9px/1.5 "Courier New", monospace;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .scribble {
+      position: absolute;
+      right: 28px;
+      top: 26px;
+      width: 58px;
+      height: 38px;
+      opacity: .55;
+      background:
+        linear-gradient(15deg, transparent 42%, var(--ink) 43% 46%, transparent 47%),
+        linear-gradient(-18deg, transparent 55%, var(--ink) 56% 59%, transparent 60%),
+        linear-gradient(5deg, transparent 65%, var(--ink) 66% 69%, transparent 70%);
+      transform: rotate(9deg);
+    }
+
+    @keyframes slam {
+      from { opacity: 0; transform: scale(.88) rotate(-2.4deg) translateY(18px); }
+      72% { opacity: 1; transform: scale(1.02) rotate(-.35deg) translateY(-3px); }
+      to { transform: scale(1) rotate(-.65deg) translateY(0); }
+    }
+
+    @media (max-width: 1080px) {
+      body { overflow: auto; }
+      .app { grid-template-columns: 220px 1fr; grid-template-rows: 86px minmax(700px, auto); }
+      .meta { grid-column: 2; grid-template-columns: repeat(4, 1fr); }
+      .meta-action { display: none; }
+      .tools { display: none; }
+      .workspace { grid-column: 2; }
+      .breakout { right: -40px; opacity: .9; }
+    }
+
+    @media (max-width: 760px) {
+      .app { display: block; min-height: 100vh; }
+      .brand { border-right: 0; }
+      .meta, .sidebar, .tools { display: none; }
+      .workspace { min-height: calc(100vh - 86px); padding: 18px 12px 80px; overflow: visible; }
+      .sheet { min-height: 700px; padding: 34px 24px 40px 56px; }
+      .screen-wash { padding: 22px 12px; overflow: auto; align-items: start; }
+      .analysis-modal { width: 100%; min-height: auto; padding: 28px 22px 28px 34px; transform: none; }
+      .analysis-modal h3 { font-size: 50px; }
+      .table-head, .analysis-row { grid-template-columns: 88px 1fr 58px; }
+      .table-head div, .analysis-row > div { padding: 8px 6px; }
+      .analysis-row .reading { font-size: 12px; }
+      .analysis-row .value { font-size: 22px; }
+      .breakout { position: relative; right: auto; bottom: auto; z-index: 0; width: calc(100% + 28px); min-height: 104px; margin: 20px -14px -14px; padding: 18px 24px 18px 84px; clip-path: polygon(4% 0, 100% 8%, 96% 100%, 0 90%); }
+      .breakout strong { margin-top: 4px; font-size: 42px; }
+      .breakout p { margin-top: 8px; }
+      .modal-actions { align-items: stretch; flex-direction: column; }
+      .confirm { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="Protótipo Escrevaral">
+    <header class="brand">
+      <div class="eyebrow">Oficina de escrita brasileira</div>
+      <h1>ESCREVA<span>RAL</span></h1>
+      <div class="micro">Motor Tiptap // Fundação 01</div>
+    </header>
+
+    <section class="meta" aria-label="Metadados do caderno">
+      <div class="meta-cell"><div class="micro">Caderno</div><strong>ESCREVARAL</strong></div>
+      <div class="meta-cell"><div class="micro">Fundação</div><strong>TIPTAP / 01</strong></div>
+      <div class="meta-cell"><div class="micro">Página</div><strong>001</strong></div>
+      <div class="meta-cell"><div class="micro">Última tinta</div><strong>Salvo</strong></div>
+      <div class="meta-action">Copiar / desenvolver / aprovar</div>
+    </section>
+
+    <aside class="sidebar" aria-label="Arquivo">
+      <div class="search-row"><input aria-label="Buscar no arquivo" placeholder="Buscar no arquivo..." /><button aria-label="Criar página">+</button></div>
+      <div class="doc-list">
+        <article class="doc active"><div><strong>Sem título</strong><small>Rascunho · agora</small></div><div class="doc-num">01</div></article>
+        <article class="doc"><div><strong>cena 2</strong><small>Rascunho · 8 min</small></div><div class="doc-num">02</div></article>
+        <article class="doc"><div><strong>Antes que as palavras...</strong><small>Rascunho · 2 h</small></div><div class="doc-num">03</div></article>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <article class="sheet">
+        <div class="sheet-top">Área de escrita</div>
+        <h2>Sem título</h2>
+        <div class="rule"></div>
+        <div class="status-row">
+          <div class="status-left"><span class="flag"></span><span class="tag">Rascunho</span></div>
+          <span class="tag blue">pt-br / local / estruturado</span>
+        </div>
+        <div class="toolbar" aria-label="Barra de formatação">
+          <button>↶</button><button>↷</button><button>T1</button><button>T2</button><button>T3</button><button>Citação</button><button>N</button><button><em>I</em></button><button><u>S</u></button><button>• Lista</button><button>1. Lista</button>
+        </div>
+        <textarea aria-label="Área de escrita" placeholder="A página espera. Ataque primeiro. Escreva em português brasileiro."></textarea>
+      </article>
+    </section>
+
+    <aside class="tools" aria-label="Ferramentas">
+      <div class="tool-tabs">
+        <button class="tool-tab">Pulso</button><button class="tool-tab">Revisão</button><button class="tool-tab">Voz</button>
+        <button class="tool-tab">Contexto</button><button class="tool-tab active">RimaLab</button><button class="tool-tab">Ferramentas</button>
+      </div>
+      <div class="tool-copy">
+        O RimaLab escuta repetições sonoras, finais de verso e pulso métrico. Prosa e verso recebem leituras diferentes; ausência de rima não é defeito.
+        <button class="analyze-button" data-open-analysis>Abrir oficina sonora</button>
+        <p>A página está vazia. Escreva um pouco antes de abrir a oficina sonora.</p>
+      </div>
+    </aside>
+  </main>
+
+  <section class="screen-wash" id="analysisOverlay" role="dialog" aria-modal="true" aria-labelledby="analysisTitle">
+    <article class="analysis-modal">
+      <span class="scribble" aria-hidden="true"></span>
+      <div class="modal-kicker">Leitura em camada // Motor de voz</div>
+      <h3 id="analysisTitle">ANÁLISE <span>DE PULSO</span></h3>
+      <p class="modal-sub">O texto não está quebrado. Ele apenas ainda não escolheu onde respirar. A leitura abaixo é uma hipótese, não uma sentença.</p>
+
+      <div class="analysis-table" aria-label="Resultados da análise">
+        <div class="table-head"><div>Item</div><div>Leitura</div><div>Índice</div></div>
+        <div class="analysis-row"><div class="label">Ritmo</div><div class="reading">A frase avança em blocos longos e recua no fim.</div><div class="value">64</div></div>
+        <div class="analysis-row active"><div class="label">Pulso</div><div class="reading">Há energia, mas duas pausas competem pelo mesmo golpe.</div><div class="value">72</div></div>
+        <div class="analysis-row"><div class="label">Voz</div><div class="reading">A impressão digital aparece antes da explicação.</div><div class="value">81</div></div>
+      </div>
+
+      <div class="modal-actions">
+        <small>Esc fecha · Enter confirma</small>
+        <button class="confirm" data-close-analysis>Voltar ao texto</button>
+      </div>
+
+      <aside class="breakout" aria-label="Recurso em destaque">
+        <div class="micro">Feature fora do frame</div>
+        <strong>VOZ<br>72</strong>
+        <p>A caixa rompe o layout quando a leitura merece ocupar o espaço físico.</p>
+      </aside>
+    </article>
+  </section>
+
+  <script>
+    const overlay = document.getElementById('analysisOverlay');
+    const openers = document.querySelectorAll('[data-open-analysis]');
+    const closers = document.querySelectorAll('[data-close-analysis]');
+
+    function openAnalysis() {
+      overlay.hidden = false;
+      requestAnimationFrame(() => overlay.querySelector('.confirm').focus());
+    }
+
+    function closeAnalysis() {
+      overlay.hidden = true;
+      openers[0]?.focus();
+    }
+
+    openers.forEach(button => button.addEventListener('click', openAnalysis));
+    closers.forEach(button => button.addEventListener('click', closeAnalysis));
+
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay) closeAnalysis();
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !overlay.hidden) closeAnalysis();
+      if (event.key === 'Enter' && !overlay.hidden && document.activeElement.tagName !== 'TEXTAREA') closeAnalysis();
+    });
+  </script>
+</body>
+</html>
