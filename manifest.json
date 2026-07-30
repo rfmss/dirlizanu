@@ -1,7 +1,7 @@
 {
   "name": "dirlizanu — Aparato deslizante",
   "short_name": "dirlizanu",
-  "description": "Quebra-cabeça de quinze peças com 40 matrizes calibradas e identidade RafaMass Blueprint.",
+  "description": "Campanha de 10 capítulos e 50 desafios deslizantes 4 × 4 e 5 × 5, auditados e offline.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#171a1d",
