@@ -1,102 +1,98 @@
 # dirlizanu
 
-Quebra-cabeça deslizante de quinze peças com 40 matrizes oficiais calibradas, manipulação direta e identidade RafaMass Blueprint.
+Quebra-cabeça deslizante offline-first com campanha de 10 capítulos, laboratório de 50 desafios e identidade RafaMass Blueprint.
 
-## Jogar
+## Estrutura de jogo
 
-Abra `index.html` ou publique a raiz como site estático.
-
-Um nível também pode ser aberto por URL:
-
-```text
-?nivel=12
-```
+- campanha com 10 capítulos;
+- laboratório com 50 desafios divididos em cinco séries;
+- matrizes 4 × 4 e 5 × 5;
+- objetivos clássicos, por movimentos, por tempo e híbridos;
+- metas bônus que concedem selos sem bloquear a conclusão;
+- geração determinística por movimentos legais;
+- auditoria de paridade, unicidade e progressão.
 
 ## Controles
 
-- clique numa peça alinhada ao vazio;
-- arraste a fileira ou coluna na direção do encaixe;
+- clique ou toque em uma peça alinhada ao vazio;
+- arraste uma fileira ou coluna válida;
 - use as setas do teclado;
-- pressione `R` para reiniciar;
-- use “Nova matriz” para uma prática calibrada sem alterar o recorde oficial.
+- pressione `R` para reiniciar.
 
-## Dificuldade
+## Responsividade
 
-Os níveis não são classificados apenas pelo número de embaralhamentos. As matrizes oficiais são medidas por distância Manhattan mais conflitos lineares.
+Durante a partida, o aparato se adapta ao `visualViewport` por largura e altura.
 
-| Faixa | Níveis | Índices |
-|---|---:|---:|
-| Iniciante | 1–10 | 9–17 |
-| Médio | 11–20 | 22–31 |
-| Difícil | 21–30 | 34–43 |
-| Especialista | 31–40 | 46–55 |
+A tela de jogo:
 
-Execute a auditoria:
+- permanece centralizada;
+- evita rolagem da página;
+- reduz metadados antes de reduzir o tabuleiro;
+- possui composições próprias para retrato e paisagem;
+- reage à abertura e ao fechamento das barras do navegador móvel;
+- respeita áreas seguras de dispositivos com recortes.
+
+A seleção de capítulos e desafios continua rolável, pois é uma tela de catálogo.
+
+## Áudio
+
+O sistema de áudio utiliza síntese local e permanece disponível offline.
+
+A camada `audio-engine.js`:
+
+- suaviza os timbres com osciladores senoidais;
+- reduz energia aguda por filtro passa-baixas;
+- mantém volume global baixo;
+- usa compressor curto para controlar picos;
+- aplica `voice stealing`: um novo som encerra o anterior imediatamente com uma rampa de 7 ms.
+
+A linguagem de microsons foi comparada com o pacote Kenney UI Audio, publicado sob CC0. Nenhum áudio remoto é carregado.
+
+Documentação completa: [`docs/AUDIO.md`](docs/AUDIO.md).
+
+## Animações
+
+Ao entrar, reiniciar ou gerar uma variação, uma sequência de aproximadamente 2,85 segundos desenha o blueprint do tabuleiro e revela as peças.
+
+Na vitória, confetes editoriais usam papel, cyan, marcas de registro e pequenos selos vermelhos.
+
+`prefers-reduced-motion` reduz as animações para uma transição breve.
+
+## Validação dos desafios
+
+Execute:
 
 ```bash
+node --check game.js
+node --check levels.js
+node --check audio-engine.js
 node scripts/audit-levels.js
 ```
 
-Detalhes: [`docs/AUDITORIA-LOGICA.md`](docs/AUDITORIA-LOGICA.md).
+O auditor exige:
 
-## Arquitetura
+- 10 capítulos;
+- 50 desafios;
+- matrizes completas;
+- estados iniciais não resolvidos;
+- ausência de duplicatas;
+- paridade solúvel;
+- progressão sem regressão;
+- índices baseados em Manhattan + conflitos lineares.
+
+## Sistema visual
+
+Arquivos reutilizáveis:
 
 ```text
-index.html                         telas e semântica
-game.js                            estado, entradas, cronômetro e áudio
-levels.js                          40 matrizes oficiais
-styles.css                         composição específica do jogo
-manifest.json                      metadados PWA
-scripts/audit-levels.js            auditor determinístico
-design-system/rafamass-blueprint.css  sistema visual reutilizável
-design-system/rafamass-blueprint-demo.html demonstração independente
+design-system/rafamass-blueprint.css
+design-system/rafamass-blueprint-demo.html
+design-system/README.md
+docs/IMPLEMENTAR-VISUAL.md
 ```
 
-O projeto não exige framework, bundler, instalação ou fontes externas.
-
-## RafaMass Blueprint System
-
-A identidade visual foi extraída para uma folha de estilo oficial que pode ser usada em outros projetos.
-
-Comece por:
-
-- [`design-system/README.md`](design-system/README.md)
-- [`docs/IMPLEMENTAR-VISUAL.md`](docs/IMPLEMENTAR-VISUAL.md)
-- [`design-system/rafamass-blueprint-demo.html`](design-system/rafamass-blueprint-demo.html)
-
-Uso mínimo:
-
-```html
-<link rel="stylesheet" href="design-system/rafamass-blueprint.css">
-
-<section data-rm-blueprint class="rm-surface">
-  <span class="rm-kicker">Registro 001</span>
-  <button class="rm-command" type="button">Executar</button>
-</section>
-```
-
-## Desempenho do arraste
-
-O gesto foi construído para evitar engasgos:
-
-- elementos móveis são armazenados em `pointerdown`;
-- `pointermove` apenas atualiza coordenadas;
-- a escrita visual é agrupada por `requestAnimationFrame`;
-- movimento usa `translate3d`;
-- não há imagem animada, filtro ou `clip-path` nas peças;
-- a peça 15 mantém a mesma geometria das demais;
-- `prefers-reduced-motion` é respeitado.
-
-## Persistência
-
-O navegador armazena:
-
-- `sp_melhor_N`: melhor quantidade de movimentos;
-- `sp_feito_N`: nível concluído;
-- `dz_audio`: preferência de som.
-
-A matriz livre não grava recordes oficiais.
+O sistema é isolado por `[data-rm-blueprint]`, utiliza tokens `--rm-*` e componentes `.rm-*`, sem frameworks, fontes remotas ou JavaScript obrigatório.
 
 ## Licença
 
-MIT. Consulte [`LICENSE`](LICENSE).
+MIT para o código e o sistema visual, conforme [`LICENSE`](LICENSE).

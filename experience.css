@@ -1,0 +1,472 @@
+/*
+ * Dirlizanu — campaign, challenge and motion layer
+ * Stacked after the RafaMass Blueprint foundations.
+ */
+
+/* The board remains the only strong signal during play. */
+#screen-game .game-footer {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+#screen-game .game-footer .button {
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 7px;
+  overflow: hidden;
+  color: var(--rm-ink);
+  border-color: rgba(22, 24, 23, .72);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.5), transparent 55%),
+    var(--rm-paper);
+  box-shadow: 0 3px 0 rgba(22, 24, 23, .82);
+  font-size: clamp(8px, 1.8vw, 10px);
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#screen-game .game-footer .button:hover {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.68), transparent 55%),
+    var(--rm-paper-high);
+}
+
+#screen-game .game-footer .button[data-command]::before {
+  margin-bottom: 4px;
+  color: #087da9;
+  font-size: 6px;
+}
+
+#screen-game .sound-toggle {
+  min-width: 0;
+}
+
+.mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 0 28px;
+}
+
+.mode-button {
+  min-height: 62px;
+  padding: 12px 16px;
+  border: 0;
+  border-right: 1px solid rgba(54, 167, 210, .46);
+  color: rgba(22, 24, 23, .66);
+  background: transparent;
+  cursor: pointer;
+  font: 700 12px/1.2 var(--rm-font-technical);
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.mode-button:last-child {
+  border-right: 0;
+}
+
+.mode-button small {
+  display: block;
+  margin-bottom: 5px;
+  color: #087da9;
+  font-size: 7px;
+  letter-spacing: .15em;
+}
+
+.mode-button.active {
+  color: var(--rm-paper);
+  background: var(--rm-ink);
+}
+
+.mode-button.active small {
+  color: var(--rm-cyan);
+}
+
+.mode-panel[hidden] {
+  display: none !important;
+}
+
+.panel-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(220px, .9fr);
+  gap: 28px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+
+.panel-heading .product-kicker {
+  margin-bottom: 8px;
+}
+
+.panel-heading h2 {
+  margin: 0;
+  color: var(--rm-paper);
+  font-size: clamp(27px, 5.5vw, 42px);
+  line-height: .94;
+  letter-spacing: -.045em;
+  text-transform: uppercase;
+}
+
+.panel-heading p {
+  margin: 0;
+  color: rgba(243, 238, 228, .64);
+  font: 11px/1.65 var(--rm-font-technical);
+}
+
+.campaign-grid,
+.challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.campaign-grid .level-card,
+.challenge-grid .level-card {
+  min-height: 122px;
+}
+
+.series-switch {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-bottom: 12px;
+  border: 1px solid rgba(54, 167, 210, .55);
+}
+
+.series-button {
+  min-height: 38px;
+  border: 0;
+  border-right: 1px solid rgba(54, 167, 210, .42);
+  color: var(--rm-cyan);
+  background: rgba(243, 238, 228, .04);
+  cursor: pointer;
+  font: 700 8px/1 var(--rm-font-technical);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.series-button:last-child {
+  border-right: 0;
+}
+
+.series-button.active {
+  color: var(--rm-ink);
+  background: var(--rm-paper);
+}
+
+.objective-strip {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 3px 10px;
+  padding: 8px 10px;
+  color: rgba(22, 24, 23, .68);
+  box-shadow: none;
+  font: 700 7px/1.4 var(--rm-font-technical);
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.objective-strip span:last-child {
+  flex: 0 0 auto;
+  color: #087da9;
+  text-align: right;
+}
+
+/* Intrinsic chassis sizing fixes the old board/frame displacement. */
+#screen-game .board-shell {
+  display: block;
+  width: max-content !important;
+  max-width: none;
+}
+
+#screen-game .board {
+  margin: 0;
+}
+
+.board[data-size="5"] .tile {
+  letter-spacing: -.04em;
+}
+
+.board[data-size="5"] .tile-registration {
+  width: 10%;
+  height: 10%;
+}
+
+/* Blueprint construction: the board is drawn before it is revealed. */
+.blueprint-intro {
+  position: absolute;
+  inset: 8px;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(22, 24, 23, .42);
+  border-radius: calc(var(--rm-radius-object) - 9px);
+  color: #087da9;
+  background:
+    radial-gradient(circle at 2px 2px, rgba(22,24,23,.075) 1px, transparent 1.2px) 0 0/8px 8px,
+    linear-gradient(145deg, rgba(216,240,248,.98), rgba(243,238,228,.98));
+  opacity: 1;
+  transition: opacity 420ms var(--rm-impact-ease);
+  pointer-events: none;
+}
+
+.blueprint-intro[hidden] {
+  display: none;
+}
+
+.blueprint-intro svg {
+  width: 82%;
+  height: 82%;
+  overflow: visible;
+}
+
+.blueprint-stroke {
+  fill: none;
+  stroke: var(--rm-cyan-strong);
+  stroke-width: .7;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: square;
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  animation: blueprintDraw 620ms var(--rm-impact-ease) forwards;
+  animation-delay: var(--bp-delay, 0ms);
+}
+
+.blueprint-frame {
+  stroke: var(--rm-ink);
+  stroke-width: 1;
+}
+
+.blueprint-corner {
+  stroke: var(--rm-vermilion);
+  stroke-width: 1.2;
+}
+
+.blueprint-caption {
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  bottom: 6%;
+  color: #087da9;
+  font: 700 7px/1.35 var(--rm-font-technical);
+  letter-spacing: .13em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.blueprint-building .tiles-layer {
+  opacity: 0;
+}
+
+.blueprint-building .slots-layer {
+  opacity: .22;
+}
+
+.blueprint-reveal .blueprint-intro {
+  opacity: 0;
+}
+
+.blueprint-reveal .tiles-layer {
+  animation: blueprintPieces 420ms var(--rm-impact-ease) both;
+}
+
+.blueprint-reveal .slots-layer {
+  animation: blueprintSlots 360ms ease both;
+}
+
+@keyframes blueprintDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes blueprintPieces {
+  from { opacity: 0; transform: translateY(6px) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes blueprintSlots {
+  from { opacity: .22; }
+  to { opacity: 1; }
+}
+
+/* Completion dossier and theme-specific confetti. */
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -36px;
+  left: var(--confetti-x);
+  width: 8px;
+  height: 20px;
+  opacity: 0;
+  animation: editorialConfetti var(--confetti-duration) cubic-bezier(.18,.72,.28,1) var(--confetti-delay) forwards;
+}
+
+.confetti-paper {
+  border: 1px solid rgba(22,24,23,.2);
+  background: var(--rm-paper);
+}
+
+.confetti-cyan {
+  width: 5px;
+  height: 27px;
+  background: var(--rm-cyan-strong);
+}
+
+.confetti-line {
+  width: 18px;
+  height: 3px;
+  border-top: 2px solid var(--rm-ink);
+  border-right: 2px solid var(--rm-ink);
+  background: transparent;
+}
+
+.confetti-stamp {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--rm-red);
+  background: transparent;
+}
+
+@keyframes editorialConfetti {
+  0% {
+    opacity: 0;
+    transform: translate3d(0,-20px,0) rotate(0deg);
+  }
+  12% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--confetti-drift),105dvh,0) rotate(var(--confetti-spin));
+  }
+}
+
+.win-seal {
+  margin: 18px 0 8px;
+  padding: 13px 15px;
+  border: 1px dashed rgba(22,24,23,.52);
+  color: rgba(22,24,23,.68);
+  background: rgba(255,255,255,.18);
+}
+
+.win-seal span,
+.win-seal strong,
+.win-seal p {
+  display: block;
+}
+
+.win-seal span {
+  color: #087da9;
+  font: 700 7px/1.3 var(--rm-font-technical);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.win-seal strong {
+  margin-top: 5px;
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+.win-seal p {
+  margin: 6px 0 0;
+  font: 10px/1.5 var(--rm-font-technical);
+}
+
+.win-seal.earned {
+  border-style: solid;
+  border-color: var(--rm-vermilion);
+  box-shadow: inset 5px 0 0 var(--rm-vermilion);
+}
+
+@media (max-width: 560px) {
+  .panel-heading {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .campaign-grid,
+  .challenge-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mode-button {
+    min-height: 56px;
+    padding-inline: 9px;
+    font-size: 10px;
+  }
+
+  .objective-strip {
+    align-items: flex-start;
+    font-size: 6.5px;
+  }
+
+  #screen-game .game-footer {
+    gap: 5px;
+  }
+
+  #screen-game .game-footer .button {
+    min-height: 45px;
+    padding-inline: 4px;
+    font-size: 8px;
+  }
+
+  #screen-game .game-footer .button[data-command]::before {
+    font-size: 5.5px;
+  }
+}
+
+@media (max-width: 370px) {
+  .campaign-grid,
+  .challenge-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .series-button {
+    font-size: 7px;
+  }
+
+  .objective-strip {
+    display: grid;
+  }
+
+  .objective-strip span:last-child {
+    text-align: left;
+  }
+
+  #screen-game .game-footer .button {
+    font-size: 7.5px;
+    letter-spacing: .04em;
+  }
+}
+
+@media (max-height: 660px) {
+  .objective-strip {
+    margin-bottom: 6px;
+    padding-block: 6px;
+  }
+
+  .blueprint-caption {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blueprint-stroke,
+  .blueprint-reveal .tiles-layer,
+  .blueprint-reveal .slots-layer,
+  .confetti-piece {
+    animation-duration: .01ms !important;
+    animation-delay: 0ms !important;
+  }
+}
