@@ -161,7 +161,7 @@ body:has(#screen-game.active) {
 }
 
 /* Landscape phones and very short embedded webviews. */
-@media (max-height: 540px) {
+@media (max-height: 540px) and (orientation: landscape) {
   :root {
     --dz-safe-gap: 5px;
     --dz-board-height-budget: 154px;
@@ -211,6 +211,41 @@ body:has(#screen-game.active) {
 
   #screen-game .game-hint {
     display: none;
+  }
+}
+
+/* Very short portrait viewports stay single-column and compress chrome. */
+@media (max-height: 540px) and (orientation: portrait) {
+  :root {
+    --dz-safe-gap: 5px;
+    --dz-board-height-budget: 205px;
+  }
+
+  #screen-game .game-topbar {
+    margin-bottom: 4px;
+  }
+
+  #screen-game .machine-head,
+  #screen-game .machine-foot,
+  #screen-game .game-hint,
+  #screen-game .game-identification small,
+  #screen-game .game-difficulty,
+  #screen-game .button[data-command]::before {
+    display: none;
+  }
+
+  #screen-game .objective-strip {
+    margin-bottom: 4px;
+    padding-block: 4px;
+  }
+
+  body #screen-game .game-footer {
+    margin-top: 5px;
+  }
+
+  body #screen-game .game-footer .button {
+    min-height: 36px;
+    padding-block: 5px;
   }
 }
 
