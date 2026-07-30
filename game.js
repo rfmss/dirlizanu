@@ -125,10 +125,7 @@
       heading.className = 'section-label';
       heading.innerHTML = '<span>' + tier.name + '</span><small>Níveis ' + start + '–' + (start + 9) + '</small>';
       grid.className = 'levels-grid';
-
-      for (var number = start; number < start + 10; number += 1) {
-        grid.appendChild(levelButton(number));
-      }
+      for (var number = start; number < start + 10; number += 1) grid.appendChild(levelButton(number));
       section.appendChild(heading);
       section.appendChild(grid);
       levelsGrid.appendChild(section);
@@ -161,14 +158,12 @@
     slotsLayer.className = 'slots-layer';
     slotsLayer.setAttribute('aria-hidden', 'true');
     tilesLayer.className = 'tiles-layer';
-
     for (var index = 0; index < 16; index += 1) {
       var slot = document.createElement('div');
       slot.className = 'slot';
       slotsLayer.appendChild(slot);
       slots.push(slot);
     }
-
     for (var value = 1; value <= 15; value += 1) {
       var tile = document.createElement('button');
       tile.type = 'button';
@@ -206,7 +201,9 @@
   }
 
   function resizeBoard() {
-    var size = Math.max(250, Math.min(boardArea.clientWidth, 520));
+    if (drag) finishDrag(true);
+    var available = Math.min(boardArea.clientWidth, window.innerHeight * .58, 520);
+    var size = Math.max(250, available);
     gap = Math.max(6, Math.min(11, Math.round(size * .021)));
     tileSize = Math.floor((size - gap * 5) / 4);
     pitch = tileSize + gap;
@@ -258,15 +255,15 @@
     return true;
   }
 
-  function commit(index, suppliedPath, fromDrag) {
+  function commit(index, path) {
     if (locked) return false;
-    var path = suppliedPath || linePath(index);
+    path = path || linePath(index);
     if (!path || path.length < 2) return false;
     startTimer();
     locked = true;
     mutate(path);
     moves += path.length - 1;
-    if (!fromDrag) render(true);
+    render(true);
     playSlide(path.length - 1);
     liveEl.textContent = (path.length - 1) + ' peça(s) deslizada(s).';
     window.setTimeout(function () {
@@ -292,10 +289,9 @@
     if (window.PointerEvent) {
       tile.addEventListener('pointerdown', function (event) {
         beginDrag(tile, value, event.clientX, event.clientY, event.pointerId, 'pointer');
-        if (drag) {
-          try { tile.setPointerCapture(event.pointerId); } catch (error) {}
-          event.preventDefault();
-        }
+        if (!drag) return;
+        try { tile.setPointerCapture(event.pointerId); } catch (error) {}
+        event.preventDefault();
       });
       tile.addEventListener('pointermove', function (event) {
         if (drag && drag.mode === 'pointer' && drag.id === event.pointerId) moveDrag(event.clientX, event.clientY);
@@ -305,6 +301,9 @@
       });
       tile.addEventListener('pointercancel', function (event) {
         if (drag && drag.mode === 'pointer' && drag.id === event.pointerId) finishDrag(true);
+      });
+      tile.addEventListener('lostpointercapture', function () {
+        if (drag && drag.mode === 'pointer') finishDrag(true);
       });
     } else {
       tile.addEventListener('touchstart', function (event) {
@@ -320,6 +319,9 @@
       }, { passive: false });
       tile.addEventListener('touchend', function (event) {
         if (drag && drag.mode === 'touch' && findTouch(event.changedTouches, drag.id)) finishDrag(false);
+      }, { passive: true });
+      tile.addEventListener('touchcancel', function () {
+        if (drag && drag.mode === 'touch') finishDrag(true);
       }, { passive: true });
       tile.addEventListener('mousedown', function (event) {
         if (event.button === 0) beginDrag(tile, value, event.clientX, event.clientY, 'mouse', 'mouse');
@@ -341,10 +343,10 @@
     var sign = axis === 'x' ? (col(empty) > col(index) ? 1 : -1) : (row(empty) > row(index) ? 1 : -1);
     var elements = [];
     for (var i = 1; i < path.length; i += 1) {
-      var el = tiles[board[path[i]]];
+      var element = tiles[board[path[i]]];
       var base = position(path[i]);
-      el.classList.add('dragging');
-      elements.push({ el: el, x: base.x, y: base.y });
+      element.classList.add('dragging');
+      elements.push({ el: element, x: base.x, y: base.y });
     }
     tile.classList.add('key-down');
     drag = { tile: tile, path: path, axis: axis, sign: sign, startX: x, startY: y, x: x, y: y, id: id, mode: mode, elements: elements, allowed: 0, frame: 0 };
@@ -383,22 +385,25 @@
     drag = null;
     state.elements.forEach(function (item) { item.el.classList.remove('dragging'); });
     state.tile.classList.remove('key-down');
-    if (success) {
-      suppressClick = true;
-      window.setTimeout(function () { suppressClick = false; }, 260);
-      mutate(state.path);
-      startTimer();
-      moves += state.path.length - 1;
-      locked = true;
-      playSlide(state.path.length - 1);
-      requestAnimationFrame(function () {
-        render(true);
-        window.setTimeout(function () {
-          locked = false;
-          if (solved()) completeLevel();
-        }, reducedMotion ? 10 : MOVE_MS + 35);
-      });
-    } else render(true);
+    if (!success) {
+      render(true);
+      return;
+    }
+    suppressClick = true;
+    window.setTimeout(function () { suppressClick = false; }, 260);
+    mutate(state.path);
+    startTimer();
+    moves += state.path.length - 1;
+    locked = true;
+    playSlide(state.path.length - 1);
+    liveEl.textContent = (state.path.length - 1) + ' peça(s) deslizada(s).';
+    requestAnimationFrame(function () {
+      render(true);
+      window.setTimeout(function () {
+        locked = false;
+        if (solved()) completeLevel();
+      }, reducedMotion ? 10 : MOVE_MS + 35);
+    });
   }
 
   document.addEventListener('mousemove', function (event) {
@@ -407,10 +412,14 @@
   document.addEventListener('mouseup', function () {
     if (drag && drag.mode === 'mouse') finishDrag(false);
   });
+  window.addEventListener('blur', function () {
+    if (drag) finishDrag(true);
+  });
 
   function startLevel(number) {
     var data = LEVELS[number - 1];
     var tier = tierFor(number);
+    if (!data) return;
     level = number;
     board = data.board.slice();
     initialBoard = data.board.slice();
@@ -424,10 +433,11 @@
     diffEl.className = 'game-difficulty ' + tier.cls;
     matrixEl.textContent = 'Matriz oficial · índice ' + data.score;
     show('game');
-    requestAnimationFrame(function () { resizeBoard(); });
+    requestAnimationFrame(resizeBoard);
   }
 
   function restart() {
+    if (drag) finishDrag(true);
     board = initialBoard.slice();
     empty = board.indexOf(0);
     moves = 0;
@@ -447,7 +457,7 @@
     locked = false;
     practice = true;
     resetTimer();
-    matrixEl.textContent = 'Matriz livre · sem recorde';
+    matrixEl.textContent = 'Matriz livre · índice ' + heuristic(board) + ' · sem recorde';
     render(false);
     playButton();
   }
@@ -496,7 +506,37 @@
       var goal = value - 1;
       score += Math.abs(row(index) - row(goal)) + Math.abs(col(index) - col(goal));
     });
-    return score;
+    return score + linearConflict(values);
+  }
+
+  function linearConflict(values) {
+    var conflicts = 0;
+    var line;
+    var a;
+    var b;
+    var valueA;
+    var valueB;
+    for (line = 0; line < SIZE; line += 1) {
+      for (a = 0; a < SIZE; a += 1) {
+        valueA = values[line * SIZE + a];
+        if (!valueA || row(valueA - 1) !== line) continue;
+        for (b = a + 1; b < SIZE; b += 1) {
+          valueB = values[line * SIZE + b];
+          if (valueB && row(valueB - 1) === line && col(valueA - 1) > col(valueB - 1)) conflicts += 2;
+        }
+      }
+    }
+    for (line = 0; line < SIZE; line += 1) {
+      for (a = 0; a < SIZE; a += 1) {
+        valueA = values[a * SIZE + line];
+        if (!valueA || col(valueA - 1) !== line) continue;
+        for (b = a + 1; b < SIZE; b += 1) {
+          valueB = values[b * SIZE + line];
+          if (valueB && col(valueB - 1) === line && row(valueA - 1) > row(valueB - 1)) conflicts += 2;
+        }
+      }
+    }
+    return conflicts;
   }
 
   function completeLevel() {
@@ -549,7 +589,7 @@
   function playPress() { tone(720, 590, .03, .008, 0); }
   function playSlide(distance) { tone(330 + distance * 25, 385 + distance * 25, .08, .02, 0); }
   function playButton() { tone(390, 340, .045, .014, 0); }
-  function playWin() { [523,659,784,1047].forEach(function (f, i) { tone(f, f, .13, .018, i * .085); }); }
+  function playWin() { [523,659,784,1047].forEach(function (frequency, index) { tone(frequency, frequency, .13, .018, index * .085); }); }
 
   function updateSound() {
     soundEl.textContent = audioEnabled ? 'Som: ligado' : 'Som: desligado';
