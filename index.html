@@ -12,6 +12,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="icon-terra.png">
   <link rel="stylesheet" href="design-system/rafamass-blueprint.css">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="refinement.css">
   <title>dirlizanu — Aparato deslizante</title>
   <script data-goatcounter="https://dirlizanu.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -83,7 +84,7 @@
 
       <footer class="game-footer">
         <button class="button rm-command" id="btnRestart" type="button" data-command="CMD 01">Reiniciar</button>
-        <button class="button button-primary rm-command" id="btnShuffle" type="button" data-command="CMD 02">Nova matriz</button>
+        <button class="button button-primary rm-command rm-signal" id="btnShuffle" type="button" data-command="CMD 02">Nova matriz</button>
         <button class="button sound-toggle rm-command" id="soundToggle" type="button" aria-pressed="true" data-command="AUDIO">Som: ligado</button>
       </footer>
 
@@ -114,7 +115,7 @@
       <p id="winRecord" class="win-record"></p>
 
       <div class="win-actions">
-        <button class="button button-primary rm-command" id="btnNext" type="button">Próximo nível</button>
+        <button class="button button-primary rm-command rm-signal" id="btnNext" type="button">Próximo nível</button>
         <button class="button rm-command" id="btnReplay" type="button">Jogar novamente</button>
         <button class="button rm-command" id="btnMenu" type="button">Menu de níveis</button>
       </div>
