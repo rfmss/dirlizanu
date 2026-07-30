@@ -1,0 +1,248 @@
+/*
+ * Dirlizanu — responsive viewport contract
+ *
+ * The gameplay screen must fit inside the visual viewport without page scroll.
+ * Width and height both participate in the board size. Secondary chrome yields
+ * before the puzzle becomes too small.
+ */
+
+:root {
+  --dz-safe-gap: clamp(8px, 1.8vmin, 16px);
+  --dz-board-height-budget: 330px;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body:has(#screen-game.active) {
+  overflow: hidden;
+}
+
+#screen-game.active {
+  display: grid;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  padding:
+    max(var(--dz-safe-gap), env(safe-area-inset-top))
+    max(var(--dz-safe-gap), env(safe-area-inset-right))
+    max(var(--dz-safe-gap), env(safe-area-inset-bottom))
+    max(var(--dz-safe-gap), env(safe-area-inset-left));
+  place-items: center;
+}
+
+#screen-game .game-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 0;
+  width: min(100%, 620px);
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+#screen-game .game-topbar {
+  min-width: 0;
+}
+
+#screen-game .machine {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#screen-game .board-area {
+  display: grid;
+  width: min(
+    calc(100% - 18px),
+    calc(100dvh - var(--dz-board-height-budget))
+  );
+  min-width: 0;
+  min-height: 0;
+  margin-inline: auto;
+  place-items: center;
+}
+
+#screen-game .board-shell {
+  width: max-content !important;
+  max-width: none;
+  justify-self: center;
+}
+
+#screen-game .game-footer,
+#screen-game .game-hint {
+  min-width: 0;
+}
+
+/* Conventional laptops and browser windows with limited vertical room. */
+@media (max-height: 800px) {
+  :root {
+    --dz-safe-gap: 8px;
+    --dz-board-height-budget: 330px;
+  }
+
+  #screen-game .game-topbar {
+    margin-bottom: 7px;
+  }
+
+  #screen-game .game-identification,
+  #screen-game .stat {
+    padding-block: 7px;
+  }
+
+  #screen-game .machine {
+    padding-block: 10px;
+  }
+
+  #screen-game .machine-head {
+    margin-bottom: 7px;
+  }
+
+  #screen-game .objective-strip {
+    margin-bottom: 7px;
+    padding-block: 6px;
+  }
+
+  #screen-game .machine-foot {
+    margin-top: 7px;
+  }
+
+  body #screen-game .game-footer {
+    margin-top: 8px;
+  }
+
+  body #screen-game .game-footer .button {
+    min-height: 42px;
+    padding-block: 6px;
+  }
+
+  #screen-game .game-hint {
+    display: none;
+  }
+}
+
+/* Short screens: metadata yields before the board. */
+@media (max-height: 680px) {
+  :root {
+    --dz-board-height-budget: 240px;
+  }
+
+  #screen-game .machine-register,
+  #screen-game .machine-foot,
+  #screen-game .game-identification small {
+    display: none;
+  }
+
+  #screen-game .machine-head strong {
+    font-size: 17px;
+  }
+
+  #screen-game .machine-kicker {
+    font-size: 7px;
+  }
+
+  #screen-game .objective-strip {
+    font-size: 6px;
+  }
+
+  #screen-game .game-footer .button[data-command]::before {
+    display: none;
+  }
+}
+
+/* Landscape phones and very short embedded webviews. */
+@media (max-height: 540px) {
+  :root {
+    --dz-safe-gap: 5px;
+    --dz-board-height-budget: 154px;
+  }
+
+  #screen-game .game-shell {
+    width: min(100%, 760px);
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 58vh);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    column-gap: 7px;
+  }
+
+  #screen-game .game-topbar {
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: 6px;
+  }
+
+  #screen-game .machine {
+    grid-column: 2;
+    grid-row: 1 / 4;
+    align-self: center;
+    padding: 7px;
+  }
+
+  #screen-game .machine-head,
+  #screen-game .objective-strip,
+  #screen-game .machine-foot {
+    display: none;
+  }
+
+  #screen-game .board-area {
+    width: min(100%, calc(100dvh - 28px));
+  }
+
+  body #screen-game .game-footer {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: end;
+    grid-template-columns: 1fr;
+    margin: 0;
+  }
+
+  body #screen-game .game-footer .button {
+    min-height: 38px;
+  }
+
+  #screen-game .game-hint {
+    display: none;
+  }
+}
+
+/* Narrow phones: preserve safe gutters and equal command widths. */
+@media (max-width: 560px) and (min-height: 541px) {
+  :root {
+    --dz-board-height-budget: 300px;
+  }
+
+  #screen-game.active {
+    padding-inline:
+      max(7px, env(safe-area-inset-left))
+      max(7px, env(safe-area-inset-right));
+  }
+
+  #screen-game .game-shell {
+    width: min(100%, 480px);
+  }
+
+  #screen-game .board-area {
+    width: min(
+      calc(100% - 14px),
+      calc(100dvh - var(--dz-board-height-budget))
+    );
+  }
+}
+
+@supports not (height: 100dvh) {
+  #screen-game .board-area {
+    width: min(
+      calc(100% - 18px),
+      calc(100vh - var(--dz-board-height-budget))
+    );
+  }
+}
