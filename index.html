@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#171a1d">
-  <meta name="description" content="Dirlizanu: aparato editorial de quebra-cabeça com 40 matrizes calibradas.">
+  <meta name="description" content="Dirlizanu: aparato editorial de quebra-cabeça com campanha e 50 desafios auditados.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="dirlizanu">
@@ -13,7 +13,8 @@
   <link rel="stylesheet" href="design-system/rafamass-blueprint.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="refinement.css">
-  <link rel="stylesheet" href="responsive-centering.css">
+  <link rel="stylesheet" href="responsive-center.css">
+  <link rel="stylesheet" href="experience.css">
   <title>dirlizanu — Aparato deslizante</title>
   <script data-goatcounter="https://dirlizanu.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -23,30 +24,63 @@
   <section id="screen-select" class="screen active" aria-hidden="false">
     <main class="select-shell">
       <header class="select-header">
-        <span class="product-kicker">Aparato deslizante // matriz 4 × 4</span>
+        <span class="product-kicker">Aparato deslizante // campanha + laboratório</span>
         <div class="select-title-lockup">
           <span class="select-index" aria-hidden="true">15</span>
           <h1>Restaure<br>a sequência.</h1>
         </div>
-        <p>Quarenta matrizes oficiais. Cada faixa mede distância, conflito e resistência antes do primeiro movimento.</p>
+        <p>Dez capítulos oficiais e cinquenta desafios. Matrizes 4 × 4 e 5 × 5, sempre geradas por movimentos válidos e auditadas antes de chegar ao jogo.</p>
         <div class="select-meta rm-meta-strip" aria-hidden="true">
           <span>LOCAL / OFFLINE</span>
-          <span>40 MATRIZES</span>
-          <span>REGISTRO PERSISTENTE</span>
+          <span>10 + 50 MATRIZES</span>
+          <span>SOLUÇÃO VERIFICADA</span>
         </div>
       </header>
-      <div id="levelsGrid" aria-label="Seleção de níveis"></div>
+
+      <nav class="mode-switch rm-meta-strip" aria-label="Modo de jogo">
+        <button class="mode-button active" id="modeCampaign" type="button" aria-pressed="true">
+          <small>ROTA 01</small>
+          Campanha
+        </button>
+        <button class="mode-button" id="modeChallenges" type="button" aria-pressed="false">
+          <small>ROTA 02</small>
+          50 desafios
+        </button>
+      </nav>
+
+      <section id="campaignPanel" class="mode-panel" aria-labelledby="modeCampaign">
+        <div class="panel-heading">
+          <div>
+            <span class="product-kicker">Campanha oficial</span>
+            <h2>Dez placas, uma escalada.</h2>
+          </div>
+          <p>Começa em 4 × 4 e termina em 5 × 5. As metas de tempo e precisão rendem selos, mas nunca transformam uma matriz solúvel em fase impossível.</p>
+        </div>
+        <div id="campaignGrid" class="campaign-grid" aria-label="Capítulos da campanha"></div>
+      </section>
+
+      <section id="challengesPanel" class="mode-panel" aria-labelledby="modeChallenges" hidden>
+        <div class="panel-heading">
+          <div>
+            <span class="product-kicker">Laboratório de desafios</span>
+            <h2>Cinquenta variações auditadas.</h2>
+          </div>
+          <p>Cinco séries de dez. Clássico, precisão, tempo e meta dupla alternam sem alterar a regra central do quebra-cabeça.</p>
+        </div>
+        <nav id="challengeSeries" class="series-switch" aria-label="Séries de desafios"></nav>
+        <div id="challengeGrid" class="challenge-grid" aria-label="Desafios da série selecionada"></div>
+      </section>
     </main>
   </section>
 
   <section id="screen-game" class="screen" aria-hidden="true">
     <main class="game-shell">
       <header class="game-topbar rm-meta-strip">
-        <button class="button button-quiet rm-command" id="btnBack" type="button">← Níveis</button>
+        <button class="button button-quiet rm-command" id="btnBack" type="button">← Seleção</button>
 
         <div class="game-identification">
-          <strong id="gameLevel">Nível 1 de 40</strong>
-          <span id="gameDifficulty" class="game-difficulty easy">★☆☆☆ Iniciante</span>
+          <strong id="gameLevel">Capítulo 1 de 10</strong>
+          <span id="gameDifficulty" class="game-difficulty easy">4 × 4 · iniciação</span>
           <small id="gameMatrix">Matriz oficial</small>
         </div>
 
@@ -62,18 +96,28 @@
         </div>
       </header>
 
-      <section class="machine rm-surface" aria-label="Aparato de jogo">
+      <section class="machine rm-surface" id="machine" aria-label="Aparato de jogo">
         <header class="machine-head">
           <div>
-            <span class="machine-kicker">Unidade móvel // sequência numérica</span>
-            <strong>Campo de montagem</strong>
+            <span class="machine-kicker" id="gameModeLabel">Campanha // capítulo oficial</span>
+            <strong id="gameTitle">Primeiro traço</strong>
           </div>
-          <div class="machine-register" aria-hidden="true">SÉRIE D-15<br>ENCAIXES 16<br>ESTADO ATIVO</div>
+          <div class="machine-register" aria-hidden="true">
+            <span id="gameSeries">SÉRIE C-01</span><br>
+            <span id="gameSize">ENCAIXES 16</span><br>
+            <span id="gameState">ESTADO ATIVO</span>
+          </div>
         </header>
+
+        <div class="objective-strip rm-meta-strip">
+          <span id="gameObjective">Objetivo: restaure a sequência.</span>
+          <span id="gameProgress">Registro livre</span>
+        </div>
 
         <div class="board-area" id="boardArea">
           <div class="board-shell" id="boardShell">
-            <div class="board" id="board" role="grid" aria-label="Quebra-cabeça de quinze peças"></div>
+            <div class="board" id="board" role="grid" aria-label="Quebra-cabeça deslizante"></div>
+            <div class="blueprint-intro" id="blueprintIntro" hidden aria-hidden="true"></div>
           </div>
         </div>
 
@@ -85,21 +129,22 @@
 
       <footer class="game-footer">
         <button class="button rm-command" id="btnRestart" type="button" data-command="CMD 01">Reiniciar</button>
-        <button class="button button-primary rm-command" id="btnShuffle" type="button" data-command="CMD 02">Nova matriz</button>
+        <button class="button rm-command" id="btnShuffle" type="button" data-command="CMD 02">Variação</button>
         <button class="button sound-toggle rm-command" id="soundToggle" type="button" aria-pressed="true" data-command="AUDIO">Som: ligado</button>
       </footer>
 
-      <p class="game-hint">Clique, arraste a fileira ou use as setas. A matriz livre não altera recordes oficiais.</p>
+      <p class="game-hint">Clique, arraste a fileira ou use as setas. Metas rendem selos; concluir a matriz continua sendo a missão principal.</p>
       <div id="gameLive" class="sr-only" aria-live="polite"></div>
     </main>
   </section>
 
   <section id="screen-win" class="screen" aria-hidden="true">
+    <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
     <main class="win-shell rm-dossier">
       <span class="product-kicker">Dossiê de conclusão // registro validado</span>
       <div class="win-heading">
-        <div class="win-mark rm-key rm-key-signal" aria-hidden="true">15</div>
-        <h2 id="winLevel">Nível restaurado</h2>
+        <div class="win-mark rm-key rm-key-signal" id="winMark" aria-hidden="true">15</div>
+        <h2 id="winLevel">Sequência restaurada</h2>
       </div>
 
       <div class="win-stats rm-meta-strip">
@@ -113,12 +158,18 @@
         </div>
       </div>
 
+      <div class="win-seal" id="winSeal">
+        <span id="winSealCode">SELO DE RESTAURAÇÃO</span>
+        <strong id="winSealTitle">Registro concluído</strong>
+        <p id="winObjective">A matriz respondeu.</p>
+      </div>
+
       <p id="winRecord" class="win-record"></p>
 
       <div class="win-actions">
-        <button class="button button-primary rm-command" id="btnNext" type="button">Próximo nível</button>
+        <button class="button button-primary rm-command" id="btnNext" type="button">Próximo</button>
         <button class="button rm-command" id="btnReplay" type="button">Jogar novamente</button>
-        <button class="button rm-command" id="btnMenu" type="button">Menu de níveis</button>
+        <button class="button rm-command" id="btnMenu" type="button">Voltar à seleção</button>
       </div>
 
       <aside class="win-breakout" aria-hidden="true">
