@@ -1,101 +1,144 @@
 # dirlizanu
 
-Quebra-cabeça deslizante de quinze peças com 40 matrizes oficiais calibradas, manipulação direta e identidade RafaMass Blueprint.
+Quebra-cabeça deslizante offline com campanha de dez capítulos, cinquenta desafios auditados, tabuleiros 4 × 4 e 5 × 5 e identidade RafaMass Blueprint.
 
 ## Jogar
 
 Abra `index.html` ou publique a raiz como site estático.
 
-Um nível também pode ser aberto por URL:
+Atalhos por URL:
 
 ```text
-?nivel=12
+?nivel=7
+?desafio=32
+```
+
+## Modos
+
+### Campanha
+
+Dez capítulos oficiais:
+
+- capítulos 1–4: tabuleiro 4 × 4;
+- capítulos 5–10: tabuleiro 5 × 5;
+- progressão medida por distância Manhattan mais conflitos lineares;
+- metas bônus de tempo, movimentos ou meta dupla;
+- a meta bônus concede selo, mas não impede a conclusão da matriz.
+
+### Laboratório
+
+Cinquenta desafios divididos em cinco séries:
+
+- Série A: desafios 1–10;
+- Série B: desafios 11–20;
+- Série C: desafios 21–30;
+- Série D: desafios 31–40;
+- Série E: desafios 41–50.
+
+Os desafios alternam restauração clássica, precisão, tempo e meta dupla.
+
+## Garantia de solução
+
+Todas as matrizes são construídas a partir do estado resolvido por uma sequência determinística de movimentos legais.
+
+Além dessa garantia por construção, a auditoria valida:
+
+- quantidade e faixa das peças;
+- ausência de duplicatas;
+- estado inicial não resolvido;
+- paridade solúvel;
+- índice heurístico declarado;
+- progressão sem regressão;
+- exatamente 10 capítulos e 50 desafios.
+
+Execute:
+
+```bash
+node --check game.js
+node --check levels.js
+node scripts/audit-levels.js
+```
+
+Resultado esperado:
+
+```text
+AUDITORIA APROVADA
+10 capítulos + 50 desafios únicos, solúveis, não resolvidos e em progressão.
 ```
 
 ## Controles
 
 - clique numa peça alinhada ao vazio;
-- arraste a fileira ou coluna na direção do encaixe;
+- arraste uma fileira ou coluna na direção do encaixe;
 - use as setas do teclado;
 - pressione `R` para reiniciar;
-- use “Nova matriz” para uma prática calibrada sem alterar o recorde oficial.
+- use “Variação” para gerar uma matriz solúvel de dificuldade próxima, sem alterar recordes oficiais.
 
-## Dificuldade
+## Movimento e desempenho
 
-Os níveis não são classificados apenas pelo número de embaralhamentos. As matrizes oficiais são medidas por distância Manhattan mais conflitos lineares.
+O arraste evita trabalho desnecessário:
 
-| Faixa | Níveis | Índices |
-|---|---:|---:|
-| Iniciante | 1–10 | 9–17 |
-| Médio | 11–20 | 22–31 |
-| Difícil | 21–30 | 34–43 |
-| Especialista | 31–40 | 46–55 |
+- elementos móveis são armazenados no início do gesto;
+- `pointermove` atualiza apenas coordenadas;
+- escritas visuais são agrupadas por `requestAnimationFrame`;
+- deslocamento usa `translate3d`;
+- não há imagens animadas, filtros ou `clip-path` nas peças;
+- redimensionamento considera largura, altura, orientação e `visualViewport`.
 
-Execute a auditoria:
+## Motion system
 
-```bash
-node scripts/audit-levels.js
-```
+Ao abrir ou reiniciar uma matriz:
 
-Detalhes: [`docs/AUDITORIA-LOGICA.md`](docs/AUDITORIA-LOGICA.md).
+1. o chassi entra em estado de construção;
+2. linhas cyan desenham a grade;
+3. marcações de registro fecham o blueprint;
+4. as peças assentam;
+5. o tabuleiro é liberado em aproximadamente 2,8 segundos.
 
-## Arquitetura
+Na vitória, o jogo produz confetes editoriais com papel, linhas cyan, marcas de corte e selos vermelhos. `prefers-reduced-motion` substitui ambas as sequências por transições quase imediatas.
+
+## Estrutura
 
 ```text
-index.html                         telas e semântica
-game.js                            estado, entradas, cronômetro e áudio
-levels.js                          40 matrizes oficiais
-styles.css                         composição específica do jogo
-manifest.json                      metadados PWA
-scripts/audit-levels.js            auditor determinístico
-design-system/rafamass-blueprint.css  sistema visual reutilizável
-design-system/rafamass-blueprint-demo.html demonstração independente
+index.html
+game.js
+levels.js
+styles.css
+refinement.css
+responsive-center.css
+experience.css
+manifest.json
+scripts/audit-levels.js
+docs/AUDITORIA-LOGICA.md
+docs/CAMPANHA-DESAFIOS-E-MOTION.md
+design-system/rafamass-blueprint.css
+design-system/rafamass-blueprint-demo.html
+design-system/README.md
+docs/IMPLEMENTAR-VISUAL.md
 ```
-
-O projeto não exige framework, bundler, instalação ou fontes externas.
 
 ## RafaMass Blueprint System
 
-A identidade visual foi extraída para uma folha de estilo oficial que pode ser usada em outros projetos.
-
-Comece por:
+A identidade visual reutilizável está documentada em:
 
 - [`design-system/README.md`](design-system/README.md)
 - [`docs/IMPLEMENTAR-VISUAL.md`](docs/IMPLEMENTAR-VISUAL.md)
 - [`design-system/rafamass-blueprint-demo.html`](design-system/rafamass-blueprint-demo.html)
 
-Uso mínimo:
-
-```html
-<link rel="stylesheet" href="design-system/rafamass-blueprint.css">
-
-<section data-rm-blueprint class="rm-surface">
-  <span class="rm-kicker">Registro 001</span>
-  <button class="rm-command" type="button">Executar</button>
-</section>
-```
-
-## Desempenho do arraste
-
-O gesto foi construído para evitar engasgos:
-
-- elementos móveis são armazenados em `pointerdown`;
-- `pointermove` apenas atualiza coordenadas;
-- a escrita visual é agrupada por `requestAnimationFrame`;
-- movimento usa `translate3d`;
-- não há imagem animada, filtro ou `clip-path` nas peças;
-- a peça 15 mantém a mesma geometria das demais;
-- `prefers-reduced-motion` é respeitado.
+A camada `experience.css` contém as composições específicas deste jogo: seleção de modos, metas, construção animada do tabuleiro e confetes de vitória.
 
 ## Persistência
 
 O navegador armazena:
 
-- `sp_melhor_N`: melhor quantidade de movimentos;
-- `sp_feito_N`: nível concluído;
+- `sp_melhor_N`: melhor quantidade de movimentos da campanha;
+- `sp_feito_N`: capítulo concluído;
+- `dz_campanha_tempo_N`: melhor tempo da campanha;
+- `dz_desafio_melhor_N`: melhor quantidade de movimentos do desafio;
+- `dz_desafio_tempo_N`: melhor tempo do desafio;
+- `dz_desafio_feito_N`: desafio concluído;
+- `dz_selo_<modo>_N`: meta bônus conquistada;
 - `dz_audio`: preferência de som.
-
-A matriz livre não grava recordes oficiais.
 
 ## Licença
 
