@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RafaMass Blueprint System — Demonstração</title>
+  <link rel="stylesheet" href="rafamass-blueprint.css">
+  <style>
+    html { min-height: 100%; background: #171a1d; }
+    body {
+      min-height: 100%;
+      margin: 0;
+      padding: 48px 18px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px) 0 0 / 42px 42px,
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px) 0 0 / 42px 42px,
+        #171a1d;
+    }
+    .demo { width: min(100%, 880px); margin: 0 auto; }
+    .hero { color: var(--rm-paper); margin-bottom: 28px; }
+    .hero h1 { margin: 8px 0 12px; font-size: clamp(42px, 9vw, 82px); line-height: .82; letter-spacing: -.07em; text-transform: uppercase; }
+    .hero p { max-width: 620px; color: rgba(243,238,228,.68); font: 13px/1.65 var(--rm-font-technical); }
+    .surface { padding: 28px; }
+    .surface h2 { margin: 6px 0 20px; font-size: 34px; letter-spacing: -.04em; text-transform: uppercase; }
+    .meta { display: grid; grid-template-columns: repeat(3, 1fr); margin-bottom: 28px; }
+    .meta span { padding: 12px; border-right: 1px solid rgba(54,167,210,.45); font: 700 9px var(--rm-font-technical); letter-spacing: .1em; text-transform: uppercase; }
+    .meta span:last-child { border-right: 0; }
+    .keys { display: grid; grid-template-columns: repeat(4, minmax(70px, 1fr)); gap: 12px; margin-bottom: 28px; }
+    .key { aspect-ratio: 1; font-size: 34px; }
+    .commands { display: flex; flex-wrap: wrap; gap: 12px; }
+    .commands button { min-height: 48px; padding: 10px 18px; cursor: pointer; }
+    .dossier { margin-top: 42px; padding: 30px 34px 30px 48px; }
+    .dossier h2 { margin: 8px 0 16px; font-size: clamp(34px, 7vw, 62px); line-height: .86; letter-spacing: -.06em; text-transform: uppercase; }
+    .dossier p { max-width: 620px; font: 15px/1.55 var(--rm-font-editorial); }
+    @media (max-width: 560px) {
+      body { padding: 32px 12px; }
+      .surface { padding: 22px 16px; }
+      .meta { grid-template-columns: 1fr; }
+      .meta span { border-right: 0; border-bottom: 1px solid rgba(54,167,210,.35); }
+      .keys { grid-template-columns: repeat(2, 1fr); }
+      .dossier { padding: 26px 20px 26px 36px; }
+    }
+  </style>
+</head>
+<body data-rm-blueprint>
+  <main class="demo">
+    <header class="hero">
+      <span class="rm-kicker">Sistema visual // versão 1.0.0</span>
+      <h1>RafaMass<br>Blueprint</h1>
+      <p>Papel organiza. Cyan mede. Tinta fecha a hierarquia. Vermilion rompe uma única vez.</p>
+    </header>
+
+    <section class="rm-surface surface">
+      <span class="rm-kicker">Objeto principal // demonstração</span>
+      <h2>Campo de montagem</h2>
+
+      <div class="rm-meta-strip meta">
+        <span>Registro 001</span>
+        <span>Estado ativo</span>
+        <span>Operação local</span>
+      </div>
+
+      <div class="keys" aria-label="Exemplos de teclas">
+        <div class="rm-key key">1</div>
+        <div class="rm-key key">7</div>
+        <div class="rm-key key">12</div>
+        <div class="rm-key rm-key-signal key">15</div>
+      </div>
+
+      <div class="commands">
+        <button class="rm-command" type="button">Reiniciar</button>
+        <button class="rm-command rm-signal" type="button">Executar</button>
+        <button class="rm-command" type="button" aria-pressed="false">Som desligado</button>
+      </div>
+    </section>
+
+    <section class="rm-dossier dossier">
+      <span class="rm-kicker">Dossiê de conclusão</span>
+      <h2>Sequência restaurada.</h2>
+      <hr class="rm-rule">
+      <p>O componente de impacto aparece depois que a estrutura terminou seu trabalho. A ruptura não substitui a grade; ela revela o resultado.</p>
+    </section>
+  </main>
+</body>
+</html>

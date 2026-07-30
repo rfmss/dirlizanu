@@ -3,26 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#b2c9c3">
-  <meta name="description" content="Dirlizanu: quebra-cabeça deslizante de quinze peças com 40 níveis calibrados.">
+  <meta name="theme-color" content="#171a1d">
+  <meta name="description" content="Dirlizanu: aparato editorial de quebra-cabeça com 40 matrizes calibradas.">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="dirlizanu">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" sizes="180x180" href="icon-terra.png">
+  <link rel="stylesheet" href="design-system/rafamass-blueprint.css">
   <link rel="stylesheet" href="styles.css">
-  <title>dirlizanu — Slide Puzzle</title>
+  <link rel="stylesheet" href="refinement.css">
+  <link rel="stylesheet" href="responsive-centering.css">
+  <title>dirlizanu — Aparato deslizante</title>
   <script data-goatcounter="https://dirlizanu.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
-<body>
-  <a class="site-return" href="https://rafa.pro.br/" aria-label="Voltar para rafa.pro.br">← rafa.pro.br</a>
+<body data-rm-blueprint>
+  <a class="site-return rm-command" href="https://rafa.pro.br/" aria-label="Voltar para rafa.pro.br">← rafa.pro.br</a>
 
   <section id="screen-select" class="screen active" aria-hidden="false">
     <main class="select-shell">
       <header class="select-header">
-        <span class="product-kicker">Slide puzzle · matriz 4 × 4</span>
-        <h1>Qual nível<br>vamos jogar?</h1>
-        <p>Deslize as peças para ordenar os números de 1 a 15. O encaixe vazio termina no canto inferior direito.</p>
+        <span class="product-kicker">Aparato deslizante // matriz 4 × 4</span>
+        <div class="select-title-lockup">
+          <span class="select-index" aria-hidden="true">15</span>
+          <h1>Restaure<br>a sequência.</h1>
+        </div>
+        <p>Quarenta matrizes oficiais. Cada faixa mede distância, conflito e resistência antes do primeiro movimento.</p>
+        <div class="select-meta rm-meta-strip" aria-hidden="true">
+          <span>LOCAL / OFFLINE</span>
+          <span>40 MATRIZES</span>
+          <span>REGISTRO PERSISTENTE</span>
+        </div>
       </header>
       <div id="levelsGrid" aria-label="Seleção de níveis"></div>
     </main>
@@ -30,8 +41,8 @@
 
   <section id="screen-game" class="screen" aria-hidden="true">
     <main class="game-shell">
-      <header class="game-topbar">
-        <button class="button button-quiet" id="btnBack" type="button">← Níveis</button>
+      <header class="game-topbar rm-meta-strip">
+        <button class="button button-quiet rm-command" id="btnBack" type="button">← Níveis</button>
 
         <div class="game-identification">
           <strong id="gameLevel">Nível 1 de 40</strong>
@@ -51,30 +62,47 @@
         </div>
       </header>
 
-      <section class="board-area" id="boardArea" aria-label="Área do quebra-cabeça">
-        <div class="board-shell" id="boardShell">
-          <div class="board" id="board" role="grid" aria-label="Quebra-cabeça de quinze peças"></div>
+      <section class="machine rm-surface" aria-label="Aparato de jogo">
+        <header class="machine-head">
+          <div>
+            <span class="machine-kicker">Unidade móvel // sequência numérica</span>
+            <strong>Campo de montagem</strong>
+          </div>
+          <div class="machine-register" aria-hidden="true">SÉRIE D-15<br>ENCAIXES 16<br>ESTADO ATIVO</div>
+        </header>
+
+        <div class="board-area" id="boardArea">
+          <div class="board-shell" id="boardShell">
+            <div class="board" id="board" role="grid" aria-label="Quebra-cabeça de quinze peças"></div>
+          </div>
         </div>
+
+        <footer class="machine-foot" aria-hidden="true">
+          <span>Arraste uma linha alinhada ao vazio.</span>
+          <span>Precisão antes do impacto.</span>
+        </footer>
       </section>
 
       <footer class="game-footer">
-        <button class="button" id="btnRestart" type="button">Reiniciar</button>
-        <button class="button button-primary" id="btnShuffle" type="button">Nova matriz</button>
-        <button class="button sound-toggle" id="soundToggle" type="button" aria-pressed="true">Som: ligado</button>
+        <button class="button rm-command" id="btnRestart" type="button" data-command="CMD 01">Reiniciar</button>
+        <button class="button button-primary rm-command" id="btnShuffle" type="button" data-command="CMD 02">Nova matriz</button>
+        <button class="button sound-toggle rm-command" id="soundToggle" type="button" aria-pressed="true" data-command="AUDIO">Som: ligado</button>
       </footer>
 
-      <p class="game-hint">Clique numa peça alinhada ao vazio, arraste a fileira ou use as setas. A matriz livre não altera recordes.</p>
+      <p class="game-hint">Clique, arraste a fileira ou use as setas. A matriz livre não altera recordes oficiais.</p>
       <div id="gameLive" class="sr-only" aria-live="polite"></div>
     </main>
   </section>
 
   <section id="screen-win" class="screen" aria-hidden="true">
-    <main class="win-shell">
-      <div class="win-mark" aria-hidden="true">15</div>
-      <span class="product-kicker">Sequência restaurada</span>
-      <h2 id="winLevel">Nível concluído</h2>
+    <main class="win-shell rm-dossier">
+      <span class="product-kicker">Dossiê de conclusão // registro validado</span>
+      <div class="win-heading">
+        <div class="win-mark rm-key rm-key-signal" aria-hidden="true">15</div>
+        <h2 id="winLevel">Nível restaurado</h2>
+      </div>
 
-      <div class="win-stats">
+      <div class="win-stats rm-meta-strip">
         <div>
           <strong id="winMoves">0</strong>
           <span>Movimentos</span>
@@ -88,10 +116,16 @@
       <p id="winRecord" class="win-record"></p>
 
       <div class="win-actions">
-        <button class="button button-primary" id="btnNext" type="button">Próximo nível</button>
-        <button class="button" id="btnReplay" type="button">Jogar novamente</button>
-        <button class="button" id="btnMenu" type="button">Menu de níveis</button>
+        <button class="button button-primary rm-command" id="btnNext" type="button">Próximo nível</button>
+        <button class="button rm-command" id="btnReplay" type="button">Jogar novamente</button>
+        <button class="button rm-command" id="btnMenu" type="button">Menu de níveis</button>
       </div>
+
+      <aside class="win-breakout" aria-hidden="true">
+        <small>SEQUÊNCIA</small>
+        <strong>OK</strong>
+        <span>Todos os encaixes responderam.</span>
+      </aside>
     </main>
   </section>
 

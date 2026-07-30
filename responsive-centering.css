@@ -1,0 +1,169 @@
+/*
+ * Dirlizanu — viewport centering and board-frame correction
+ *
+ * The game engine assigns the inner board its measured square size. The outer
+ * chassis also has padding and borders, so it must use intrinsic width instead
+ * of repeating the same inline width. This file fixes that box-model mismatch
+ * and makes the complete game composition respond to both viewport width and
+ * viewport height.
+ */
+
+:root {
+  --dz-frame-extra: 20px;
+  --dz-viewport-gutter: clamp(8px, 2.2vw, 18px);
+  --dz-board-by-height: calc(100dvh - 270px);
+}
+
+#screen-game.active {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  padding:
+    max(var(--dz-viewport-gutter), env(safe-area-inset-top))
+    max(var(--dz-viewport-gutter), env(safe-area-inset-right))
+    max(var(--dz-viewport-gutter), env(safe-area-inset-bottom))
+    max(var(--dz-viewport-gutter), env(safe-area-inset-left));
+  place-items: safe center;
+}
+
+#screen-game .game-shell {
+  width: min(100%, 620px);
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * The parent is intentionally slightly narrower than the available machine
+ * content. game.js reads this width to calculate the inner square; the chassis
+ * then adds its own padding without overflowing or shifting the board.
+ */
+#screen-game .board-area {
+  width: min(
+    calc(100% - var(--dz-frame-extra)),
+    max(250px, var(--dz-board-by-height))
+  );
+  margin-inline: auto;
+}
+
+/*
+ * game.js writes an inline width equal to the inner board. Intrinsic sizing is
+ * the correct source of truth for the outer frame because the frame also owns
+ * padding and borders. !important is limited to this single geometry repair.
+ */
+#screen-game .board-shell {
+  width: max-content !important;
+  max-width: none;
+  justify-self: center;
+}
+
+#screen-game .board {
+  margin: 0;
+}
+
+#screen-game .game-topbar,
+#screen-game .machine,
+#screen-game .game-footer,
+#screen-game .game-hint {
+  width: 100%;
+}
+
+/* Standard phones and narrow browser columns. */
+@media (max-width: 560px) {
+  :root {
+    --dz-frame-extra: 18px;
+    --dz-board-by-height: calc(100dvh - 260px);
+  }
+
+  #screen-game.active {
+    padding-inline:
+      max(8px, env(safe-area-inset-left))
+      max(8px, env(safe-area-inset-right));
+  }
+
+  #screen-game .game-shell {
+    width: min(100%, 480px);
+  }
+}
+
+/* Short screens and landscape phones: reduce non-game chrome before shrinking
+   the physical board below a useful touch size. */
+@media (max-height: 660px) {
+  :root {
+    --dz-board-by-height: calc(100dvh - 218px);
+  }
+
+  #screen-game .game-topbar {
+    margin-bottom: 7px;
+  }
+
+  #screen-game .game-identification {
+    padding-block: 7px;
+  }
+
+  #screen-game .stat {
+    padding-block: 6px;
+  }
+
+  #screen-game .machine {
+    padding-block: 10px;
+  }
+
+  #screen-game .machine-head {
+    margin-bottom: 7px;
+  }
+
+  #screen-game .machine-register,
+  #screen-game .machine-foot,
+  #screen-game .game-hint {
+    display: none;
+  }
+
+  #screen-game .game-footer {
+    margin-top: 8px;
+  }
+
+  #screen-game .button {
+    min-height: 42px;
+    padding-block: 7px;
+  }
+}
+
+/* Very short landscape viewports keep the entire instrument centered and
+   usable. The page may scroll only when the physical viewport is smaller than
+   the minimum accessible board and controls together. */
+@media (max-height: 500px) and (orientation: landscape) {
+  :root {
+    --dz-board-by-height: calc(100dvh - 178px);
+  }
+
+  #screen-game .game-topbar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  #screen-game .game-identification small,
+  #screen-game .game-difficulty,
+  #screen-game .button[data-command]::before {
+    display: none;
+  }
+
+  #screen-game .machine-head {
+    display: none;
+  }
+
+  #screen-game .game-footer {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #screen-game .sound-toggle {
+    min-width: 0;
+  }
+}
+
+/* Keep the intended absolute visual center when browser UI changes the visual
+   viewport, while allowing safe top alignment as a last resort. */
+@supports not (height: 100dvh) {
+  :root {
+    --dz-board-by-height: calc(100vh - 270px);
+  }
+}
